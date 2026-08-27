@@ -56,3 +56,10 @@ fn stays_ready_when_polled_after_completion() {
     assert_eq!(poll_once(future.as_mut(), &waker.waker()), Poll::Ready(1));
     assert_eq!(poll_once(future.as_mut(), &waker.waker()), Poll::Ready(1));
 }
+
+#[test]
+fn is_unpin_without_a_manual_impl() {
+    // Both variants hold only `usize`, so the derived impl covers this.
+    fn assert_unpin<T: Unpin>() {}
+    assert_unpin::<CountDown>();
+}

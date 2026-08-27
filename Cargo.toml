@@ -6,3 +6,15 @@ edition = "2024"
 [dependencies]
 tokio = { version = "1", features = ["time", "macros", "rt", "rt-multi-thread", "sync"] }
 pin-project-lite = "0.2"
+
+[dev-dependencies]
+# test-util provides a paused clock, so the timeout tests are deterministic and
+# instant instead of sleeping in real time.
+tokio = { version = "1", features = [
+    "time",
+    "macros",
+    "rt",
+    "rt-multi-thread",
+    "sync",
+    "test-util",
+] }

@@ -1,7 +1,9 @@
 //! Tests for the newtype wrappers, focused on the pinning rules they demonstrate.
 
 use futures_patterns::basic::ready::{Ready, ready};
-use futures_patterns::basic::wrapper::{Finished, OptionFuture, SimpleOptionFuture};
+use futures_patterns::basic::wrapper::{
+    Finished, OptionFuture, SimpleOptionFuture, SimpleWrapper,
+};
 use futures_patterns::testing::poll_once;
 use std::task::{Poll, Waker};
 
@@ -71,4 +73,11 @@ fn simple_option_future_clears_itself_after_completion() {
 fn finished_forwards_to_the_inner_future() {
     let mut fut = Box::pin(Finished::new(ready("done")));
     assert_eq!(poll_once(fut.as_mut(), Waker::noop()), Poll::Ready("done"));
+}
+
+#[test]
+fn the_simple_wrappers_are_unpin_exactly_when_the_inner_future_is() {
+    fn assert_unpin<T: Unpin>() {}
+    assert_unpin::<SimpleWrapper<Ready<i32>>>();
+    assert_unpin::<SimpleOptionFuture<Ready<i32>>>();
 }
