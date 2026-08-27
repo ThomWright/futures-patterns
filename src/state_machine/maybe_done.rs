@@ -11,12 +11,14 @@
 //! # State transitions
 //!
 //! ```text
-//! Future -> Done -> Gone
-//!   ^       ^       ^
-//!   |       |       |
-//!   poll()  |    take_output()
-//!           |
-//!      poll() returns Ready
+//! Future --poll() returns Pending--> Future   (inner future still running)
+//!        --poll() returns Ready----> Done     (output stored)
+//!
+//! Done   --poll()---------------> Done     (absorbed; inner is NOT re-polled)
+//!        --take_output()--------> Gone     (output handed over)
+//!
+//! Gone   --poll()---------------> panic
+//!        --take_output()--------> None
 //! ```
 //!
 //! # Why three states?
@@ -84,8 +86,12 @@ pub enum MaybeDone<Fut: Future> {
     Gone,
 }
 
-// SAFETY: We never generate `Pin<&mut Fut::Output>`, so it's safe to implement
-// Unpin when Fut is Unpin. The Output doesn't need to be pinned.
+// Deliberately broader than the derived impl, which would also require
+// `Fut::Output: Unpin` because the `Done` variant holds an output.
+//
+// SAFETY: the output is never structurally pinned -- no `Pin<&mut Fut::Output>` is
+// ever created, and `take_output` moves it out freely -- so only `Fut` needs to be
+// `Unpin` for the whole enum to be safely movable.
 impl<Fut: Future + Unpin> Unpin for MaybeDone<Fut> {}
 
 /// Wraps a future into a `MaybeDone`.
@@ -192,7 +198,7 @@ impl<Fut: Future> MaybeDone<Fut> {
             if let MaybeDone::Done(output) = mem::replace(this, MaybeDone::Gone) {
                 Some(output)
             } else {
-                // SAFETY: We just matched on Done above, so this is unreachable
+                // Unreachable: the match above returned for every variant but Done.
                 unreachable!()
             }
         }

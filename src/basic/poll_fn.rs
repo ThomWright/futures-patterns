@@ -103,7 +103,17 @@ where
     type Output = T;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
-        // SAFETY: We are not moving out of the pinned field.
+        // SAFETY: we never construct a `Pin<&mut F>` anywhere, so reaching `f` through
+        // an unpinned `&mut` is sound. `f` is called, never polled.
+        //
+        // `pin_project!` cannot replace this unsafe block directly:
+        //  * with `#[pin]` on the field, projection yields `Pin<&mut F>`, which cannot
+        //    be used to call the closure;
+        //  * without `#[pin]`, the generated struct becomes unconditionally `Unpin`,
+        //    which is the very thing that must be avoided.
+        //
+        // The `alt` module below gets there anyway, using `#[project(!Unpin)]` to opt
+        // out of the generated `Unpin` impl.
         let me = unsafe { Pin::into_inner_unchecked(self) };
         (me.f)(cx)
     }
@@ -125,10 +135,14 @@ where
 ///
 /// # Why `#[project(!Unpin)]` is required here
 ///
-/// By default `pin_project!` generates a conditional `Unpin` impl equivalent to the
-/// manual one, which would be fine. The attribute makes the struct *unconditionally*
-/// `!Unpin` instead, which is strictly more conservative: it holds even when `F` is
-/// `Unpin`.
+/// Without the attribute, `pin_project!` generates an `Unpin` impl that holds whenever
+/// the unpinned fields are `Unpin` -- and since `f` is not a `#[pin]` field, that makes
+/// `PollFn<F>` `Unpin` far too eagerly. Tokio's own comment cites exactly this as the
+/// reason pin-project cannot be used for `poll_fn`.
+///
+/// `#[project(!Unpin)]` is what closes that gap: it makes the struct *unconditionally*
+/// `!Unpin`, which is strictly more conservative than the manual impl, holding even
+/// when `F` is `Unpin`.
 ///
 /// That is the safe choice for `poll_fn` specifically. As the parent module explains,
 /// the hazard is that an `Unpin` `PollFn` lets the compiler apply `noalias` to

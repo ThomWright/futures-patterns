@@ -79,6 +79,27 @@
 //! - Transition between states during polling
 //! - Store and extract values at different stages
 //!
+//! ## Polling after completion
+//!
+//! Once a future returns `Poll::Ready`, the caller must not poll it again. `.await`
+//! and the runtime both honour this, so the rule only comes up when writing a
+//! combinator that drives futures itself.
+//!
+//! Because it is the caller's obligation, an implementation may do as it likes when
+//! the rule is broken, and the patterns here deliberately differ:
+//!
+//! - [`basic::ready`] and [`composition::map`] panic. Both consume something on
+//!   completion -- a value, an `FnOnce` -- so there is nothing left to return, and a
+//!   panic beats a silent wrong answer.
+//! - [`state_machine::two_state`] keeps returning the same value. It is idempotent
+//!   because it stores its output rather than moving it out.
+//! - [`state_machine::maybe_done`] absorbs the extra poll without touching the inner
+//!   future. This is the load-bearing one: it is what lets `join!` poll every branch
+//!   on every wakeup without re-polling the branches that already finished.
+//!
+//! When you need this guarantee from an arbitrary future rather than choosing it per
+//! type, the usual tool is a `Fuse` combinator, which latches on completion.
+//!
 //! ## Wakers
 //!
 //! When a future returns `Poll::Pending`, it must arrange for the task to be

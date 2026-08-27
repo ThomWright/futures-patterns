@@ -416,6 +416,11 @@ impl<F> OptionFuture<F> {
 impl<F: Future> Future for OptionFuture<F> {
     type Output = Option<F::Output>;
 
+    // Note the asymmetry with `SimpleOptionFuture` below, which clears its slot on
+    // completion and so reports `None` if polled again. This one leaves the slot
+    // populated, so a second poll would re-poll a finished future. That is the
+    // caller's contract violation rather than something to defend against here, but
+    // it does mean the two types behave differently when the rule is broken.
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         // Project to get Pin<&mut Option<F>>
         let inner = self.project().inner;

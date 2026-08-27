@@ -2,10 +2,7 @@
 
 A collection of patterns for implementing `Futures` in Rust.
 
-This crate provides educational implementations of common Future patterns,
-based on real-world examples from tokio and other production async libraries.
-Each pattern includes comprehensive documentation explaining the concepts,
-trade-offs, and implementation details.
+This crate provides educational implementations of common Future patterns, based on real-world examples from tokio and other production async libraries. Each pattern includes comprehensive documentation explaining the concepts, trade-offs, and implementation details.
 
 ## Patterns Implemented
 
@@ -34,9 +31,7 @@ trade-offs, and implementation details.
 
 - **testing** - Poll futures by hand, and count wakes
 
-`.await` only shows a future's final output. To test a `Future` implementation you
-need to see the poll sequence itself: how many polls it took, and whether the task
-was woken when it should have been. That is where the subtle bugs live.
+`.await` only shows a future's final output. To test a `Future` implementation you need to see the poll sequence itself: how many polls it took, and whether the task was woken when it should have been. That is where the subtle bugs live.
 
 ## Learning Path
 
@@ -51,17 +46,13 @@ Recommended order for understanding the patterns:
 7. Study coordination with `composition::race`
 8. Finish with `time::timeout` to see everything combined
 
-`testing` is useful throughout; reach for it as soon as you want to assert on
-something `.await` cannot show you.
+`testing` is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
 
 ## Documentation
 
-Run `cargo doc --open` to view the full documentation with detailed explanations
-of each pattern.
+Run `cargo doc --open` to view the full documentation with detailed explanations of each pattern.
 
-Run `cargo test` to check them. Most of the explanation lives in doc comments, so
-the doctests are a substantial part of the suite; `tests/` holds the poll-level
-tests that `.await` cannot express.
+Run `cargo test` to check them. Most of the explanation lives in doc comments, so the doctests are a substantial part of the suite; `tests/` holds the poll-level tests that `.await` cannot express.
 
 ## References
 
@@ -69,4 +60,4 @@ Based on implementations from:
 
 - [tokio](https://github.com/tokio-rs/tokio)
 - [tower](https://github.com/tower-rs/tower)
-- [linkerd](https://github.com/linkerd/linkerd2)
+- [linkerd-proxy](https://github.com/linkerd/linkerd2-proxy)

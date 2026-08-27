@@ -73,4 +73,8 @@ impl<T> Future for Ready<T> {
     }
 }
 
+// Not redundant. `Unpin` is an auto trait, so the derived impl would only hold when
+// `T: Unpin`. `Ready` never creates a `Pin<&mut T>` -- the value is moved straight out
+// with `take()` -- so it is sound to be `Unpin` for every `T`, and useful: it means a
+// `Ready<T>` can be polled without boxing even when `T` cannot be moved.
 impl<T> Unpin for Ready<T> {}

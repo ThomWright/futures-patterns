@@ -43,7 +43,7 @@
 //!
 //! match race(fast, slow).await {
 //!     Either::Left(value) => assert_eq!(value, 42),
-//!     Either::Right(value) => panic!("slow future won!"),
+//!     Either::Right(_) => panic!("slow future won!"),
 //! }
 //! # }
 //! ```
