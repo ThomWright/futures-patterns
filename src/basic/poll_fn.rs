@@ -109,10 +109,12 @@ where
     }
 }
 
-// We deliberately do NOT write `impl<F> Unpin for PollFn<F> {}`. Instead `PollFn<F>`
-// is `Unpin` only when `F` is, which is what the module docs above explain is needed
-// for soundness.
-impl<F: Unpin> Unpin for PollFn<F> {}
+// There is deliberately no `Unpin` impl here at all, not even a conditional one.
+//
+// The derived impl already makes `PollFn<F>` `Unpin` exactly when `F` is, which is what
+// soundness requires; writing it out by hand would only restate that. What matters is
+// that we never write the *unconditional* `impl<F> Unpin for PollFn<F> {}`. Tokio does
+// the same, and covers the property with a test rather than an impl.
 
 /// A safe alternative to the manual `unsafe` implementation above.
 ///

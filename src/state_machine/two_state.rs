@@ -118,5 +118,5 @@ impl Future for CountDown {
     }
 }
 
-// CountDown is Unpin because neither state contains any pinned data
-impl Unpin for CountDown {}
+// No manual `Unpin` impl is needed: both variants hold only `usize`, so the compiler
+// derives `Unpin` already.

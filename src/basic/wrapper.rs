@@ -275,8 +275,7 @@ impl<F: Future + Unpin> Future for SimpleWrapper<F> {
     }
 }
 
-// SimpleWrapper is Unpin when F is Unpin
-impl<F: Unpin> Unpin for SimpleWrapper<F> {}
+// No manual `Unpin` impl: the derived one is already `Unpin` exactly when `F` is.
 
 // Example: Wrapping Option<Future> - a future that might not exist
 pin_project! {
@@ -476,4 +475,4 @@ impl<F: Future + Unpin> Future for SimpleOptionFuture<F> {
     }
 }
 
-impl<F: Unpin> Unpin for SimpleOptionFuture<F> {}
+// As with `SimpleWrapper`, the derived `Unpin` impl is already what we want.

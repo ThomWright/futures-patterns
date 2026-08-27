@@ -134,10 +134,10 @@ pin_project! {
     /// or `Err(Elapsed)` if the timeout expires first.
     #[derive(Debug)]
     #[must_use = "futures do nothing unless you `.await` or poll them"]
-    pub struct Timeout<T> {
+    pub struct Timeout<Fut> {
         // The future we're racing against time
         #[pin]
-        value: T,
+        value: Fut,
 
         // The tokio sleep timer
         #[pin]
@@ -145,37 +145,37 @@ pin_project! {
     }
 }
 
-impl<T> Timeout<T> {
+impl<Fut> Timeout<Fut> {
     /// Creates a new `Timeout` with the given future and delay.
     ///
     /// This is an internal constructor. Use the [`timeout`] function instead.
-    fn new(value: T, delay: Sleep) -> Self {
+    fn new(value: Fut, delay: Sleep) -> Self {
         Timeout { value, delay }
     }
 
     /// Gets a reference to the underlying value in this timeout.
-    pub fn get_ref(&self) -> &T {
+    pub fn get_ref(&self) -> &Fut {
         &self.value
     }
 
     /// Gets a mutable reference to the underlying value in this timeout.
-    pub fn get_mut(&mut self) -> &mut T {
+    pub fn get_mut(&mut self) -> &mut Fut {
         &mut self.value
     }
 
     /// Consumes this timeout, returning the underlying value.
     ///
     /// This allows extracting the inner future without waiting for completion.
-    pub fn into_inner(self) -> T {
+    pub fn into_inner(self) -> Fut {
         self.value
     }
 }
 
-impl<T> Future for Timeout<T>
+impl<Fut> Future for Timeout<Fut>
 where
-    T: Future,
+    Fut: Future,
 {
-    type Output = Result<T::Output, Elapsed>;
+    type Output = Result<Fut::Output, Elapsed>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.project();
@@ -239,9 +239,9 @@ where
 ///
 /// This function requires a tokio runtime to be active, as it uses tokio's
 /// timer infrastructure via [`tokio::time::sleep`].
-pub fn timeout<F>(duration: Duration, future: F) -> Timeout<F>
+pub fn timeout<Fut>(duration: Duration, future: Fut) -> Timeout<Fut>
 where
-    F: Future,
+    Fut: Future,
 {
     let delay = sleep(duration);
     Timeout::new(future, delay)
@@ -269,9 +269,9 @@ where
 /// }
 /// # }
 /// ```
-pub fn timeout_at<F>(deadline: tokio::time::Instant, future: F) -> Timeout<F>
+pub fn timeout_at<Fut>(deadline: tokio::time::Instant, future: Fut) -> Timeout<Fut>
 where
-    F: Future,
+    Fut: Future,
 {
     let delay = tokio::time::sleep_until(deadline);
     Timeout::new(future, delay)
