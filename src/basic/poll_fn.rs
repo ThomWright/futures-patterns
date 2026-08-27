@@ -217,3 +217,38 @@ pub mod alt {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::poll_fn;
+    use crate::testing::{CountingWaker, poll_once};
+    use std::task::{Poll, Waker};
+
+    #[test]
+    fn calls_the_closure_on_every_poll() {
+        let waker = CountingWaker::new();
+        let mut polls = 0;
+        let mut fut = Box::pin(poll_fn(|cx| {
+            polls += 1;
+            if polls >= 3 {
+                Poll::Ready(polls)
+            } else {
+                cx.waker().wake_by_ref();
+                Poll::Pending
+            }
+        }));
+
+        assert_eq!(poll_once(fut.as_mut(), &waker.waker()), Poll::Pending);
+        assert_eq!(poll_once(fut.as_mut(), &waker.waker()), Poll::Pending);
+        assert_eq!(poll_once(fut.as_mut(), &waker.waker()), Poll::Ready(3));
+        assert_eq!(waker.count(), 2, "one wake per pending poll");
+    }
+
+    #[test]
+    fn alt_polls_like_the_manual_version() {
+        // That `alt::PollFn` is unconditionally `!Unpin` cannot be asserted positively
+        // at runtime; the `compile_fail` doctest on the module covers it instead.
+        let mut fut = Box::pin(super::alt::poll_fn(|_cx| Poll::Ready(7)));
+        assert_eq!(poll_once(fut.as_mut(), Waker::noop()), Poll::Ready(7));
+    }
+}

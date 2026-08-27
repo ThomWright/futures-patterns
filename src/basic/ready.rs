@@ -78,3 +78,25 @@ impl<T> Future for Ready<T> {
 // with `take()` -- so it is sound to be `Unpin` for every `T`, and useful: it means a
 // `Ready<T>` can be polled without boxing even when `T` cannot be moved.
 impl<T> Unpin for Ready<T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::ready;
+    use crate::testing::poll_once;
+    use std::task::{Poll, Waker};
+
+    #[test]
+    fn completes_on_first_poll() {
+        let mut fut = Box::pin(ready(42));
+        assert_eq!(poll_once(fut.as_mut(), Waker::noop()), Poll::Ready(42));
+    }
+
+    #[test]
+    #[should_panic(expected = "Ready polled after completion")]
+    fn panics_when_polled_after_completion() {
+        // The value was moved out on the first poll, so there is nothing to return.
+        let mut fut = Box::pin(ready(42));
+        let _ = poll_once(fut.as_mut(), Waker::noop());
+        let _ = poll_once(fut.as_mut(), Waker::noop());
+    }
+}

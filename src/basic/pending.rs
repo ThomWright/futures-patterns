@@ -110,3 +110,47 @@ impl<T> Clone for Pending<T> {
 }
 
 impl<T> Copy for Pending<T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::{Pending, pending};
+    use crate::testing::{CountingWaker, poll_once};
+    use std::marker::PhantomPinned;
+    use std::rc::Rc;
+    use std::task::Poll;
+
+    fn assert_send<T: Send>() {}
+    fn assert_sync<T: Sync>() {}
+    fn assert_unpin<T: Unpin>() {}
+
+    #[test]
+    fn never_completes_and_never_wakes() {
+        let waker = CountingWaker::new();
+        let mut fut = Box::pin(pending::<i32>());
+
+        assert_eq!(poll_once(fut.as_mut(), &waker.waker()), Poll::Pending);
+        assert_eq!(poll_once(fut.as_mut(), &waker.waker()), Poll::Pending);
+        // Waking would be wrong: no progress is ever possible, so a wake would only
+        // spin the scheduler.
+        assert_eq!(waker.count(), 0);
+    }
+
+    #[test]
+    fn auto_traits_do_not_depend_on_t() {
+        // `Pending<T>` stores no `T`, so its auto traits should not follow `T`. This
+        // holds only because the marker is `PhantomData<fn() -> T>` rather than
+        // `PhantomData<T>`, matching `std::future::Pending`.
+        assert_send::<Pending<Rc<()>>>();
+        assert_sync::<Pending<Rc<()>>>();
+        assert_unpin::<Pending<PhantomPinned>>();
+    }
+
+    #[test]
+    fn is_zero_sized_and_copyable() {
+        assert_eq!(std::mem::size_of::<Pending<[u8; 1024]>>(), 0);
+        // Copy, not just Clone, and without requiring `T: Clone`.
+        let a = pending::<Rc<()>>();
+        let _b = a;
+        let _c = a;
+    }
+}
