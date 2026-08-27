@@ -18,6 +18,12 @@ This crate provides educational implementations of common Future patterns, based
 - **MaybeDone** - Track whether a future has completed
 - **TwoState** - Simple countdown state machine
 
+### Waking
+
+- **shared_state** - A future woken by another thread
+
+Every other pattern here completes immediately, wakes itself, or forwards a poll to a future underneath it. This one parks and is woken by something external, which is what leaf futures do and what everything else is built on.
+
 ### Composition Patterns
 
 - **Map** - Transform a future's output
@@ -41,10 +47,11 @@ Recommended order for understanding the patterns:
 2. Study `basic::poll_fn` to learn about pinning and unsafe usage
 3. Read `basic::wrapper` for the pinning rules around wrapping a future
 4. Move to `state_machine::two_state` for a simple state machine
-5. Examine `state_machine::maybe_done` for a production-like pattern
-6. Learn composition with `composition::map`
-7. Study coordination with `composition::race`
-8. Finish with `time::timeout` to see everything combined
+5. Build a leaf future in `waking::shared_state` to see where readiness comes from, and how a waker gets stored for another thread to find
+6. Examine `state_machine::maybe_done` for a production-like pattern
+7. Learn composition with `composition::map`
+8. Study coordination with `composition::race`
+9. Finish with `time::timeout` to see everything combined
 
 `testing` is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
 

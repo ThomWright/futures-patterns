@@ -32,6 +32,16 @@
 //! examples show how to use enums to represent different states and manage
 //! transitions during polling.
 //!
+//! ## Waking
+//!
+//! Where readiness comes from in the first place:
+//!
+//! - [`waking::shared_state`] - A future woken by another thread
+//!
+//! Every other pattern here completes immediately, wakes itself, or forwards a poll
+//! to a future underneath it. This one parks and is woken by something external,
+//! which is what leaf futures do and what the rest are ultimately built on.
+//!
 //! ## Composition Patterns
 //!
 //! See how to combine futures to create more powerful abstractions:
@@ -108,6 +118,8 @@
 //! - When to call `wake()` (in `two_state`)
 //! - When NOT to call `wake()` (in `pending`)
 //! - How wakers are handled by composed futures
+//! - How to store one so another thread can wake you (in `waking::shared_state`),
+//!   which is the case the other three avoid
 //!
 //! # Examples
 //!
@@ -178,11 +190,14 @@
 //!
 //! 1. Start with [`basic::ready`] and [`basic::pending`] to understand the Future trait
 //! 2. Study [`basic::poll_fn`] to learn about pinning and unsafe usage
-//! 3. Move to [`state_machine::two_state`] for a simple state machine
-//! 4. Examine [`state_machine::maybe_done`] for a production-like pattern
-//! 5. Learn composition with [`composition::map`]
-//! 6. Study coordination with [`composition::race`]
-//! 7. Finish with [`time::timeout`] to see everything combined
+//! 3. Read [`basic::wrapper`] for the pinning rules around wrapping a future
+//! 4. Move to [`state_machine::two_state`] for a simple state machine
+//! 5. Build a leaf future in [`waking::shared_state`] to see where readiness
+//!    comes from, and how a waker gets stored for another thread to find
+//! 6. Examine [`state_machine::maybe_done`] for a production-like pattern
+//! 7. Learn composition with [`composition::map`]
+//! 8. Study coordination with [`composition::race`]
+//! 9. Finish with [`time::timeout`] to see everything combined
 //!
 //! # References
 //!
@@ -199,3 +214,4 @@ pub mod composition;
 pub mod state_machine;
 pub mod testing;
 pub mod time;
+pub mod waking;
