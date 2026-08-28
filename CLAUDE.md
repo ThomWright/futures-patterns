@@ -47,6 +47,12 @@ Each module should answer, roughly in this order:
 
 Ground claims about production code in the source rather than from memory. Quote it when the wording matters; several confident paraphrases have turned out to be wrong.
 
+## Attribution
+
+Everything here is a reimplementation, and some modules follow their original closely enough to be derived work. Record those in `NOTICE.md` with the upstream copyright, the licence text, and the file each one follows, and put a one-line note at the end of the module's own docs.
+
+Decide which by comparing against the source rather than from memory. `composition::map` reads like it must be derived from futures-rs and is not — theirs is an enum using `project_replace`, ours a struct holding an `Option<F>` — while `basic::ready` looked incidental and turned out to share std's design and its panic message.
+
 ## Tests
 
 - Unit tests live in-module, in `#[cfg(test)] mod tests`. There is deliberately no `tests/` directory.

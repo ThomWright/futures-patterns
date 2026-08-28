@@ -66,6 +66,8 @@
 //! assert_eq!((a, b), (1, "two"));
 //! # }
 //! ```
+//!
+//! Follows `futures-util/src/future/join.rs`; see NOTICE.md.
 
 use crate::state_machine::maybe_done::{MaybeDone, maybe_done};
 use pin_project_lite::pin_project;

@@ -21,6 +21,8 @@
 //! must ask before polling. A [`join`](crate::composition::join) does not need it: it
 //! polls `MaybeDone` specifically, and relies on that type's own promise instead.
 //! Both `futures` and `tokio` implement join exactly that way.
+//!
+//! Follows the trait in `futures-core/src/future.rs`; see NOTICE.md.
 
 use std::future::Future;
 

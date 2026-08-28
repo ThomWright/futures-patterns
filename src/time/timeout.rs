@@ -49,7 +49,8 @@
 //! The consequence is that this `timeout` can under-report expiry when wrapped around
 //! a future that drains the budget. Prefer [`tokio::time::timeout`] in production.
 //!
-//! See `tokio/src/time/timeout.rs` for the original.
+//! Follows `tokio/src/time/timeout.rs`, with `Elapsed`'s message from
+//! `tokio/src/time/error.rs`; see NOTICE.md.
 //!
 //! # When to use
 //!

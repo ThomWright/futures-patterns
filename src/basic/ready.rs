@@ -20,6 +20,8 @@
 //! assert_eq!(value, 42);
 //! # }
 //! ```
+//!
+//! Follows `core::future::Ready`; see NOTICE.md.
 
 use std::future::Future;
 use std::pin::Pin;

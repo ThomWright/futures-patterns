@@ -67,6 +67,8 @@
 //! assert_eq!(value, None);
 //! # }
 //! ```
+//!
+//! Follows `futures-util/src/future/maybe_done.rs`; see NOTICE.md.
 
 use crate::fused::FusedFuture;
 use std::future::Future;

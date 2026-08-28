@@ -78,8 +78,4 @@ Based on implementations from:
 
 MIT — see [LICENSE](LICENSE).
 
-Several patterns follow production implementations closely enough to count as derived work, and those carry their own MIT notices:
-
-- [tokio](https://github.com/tokio-rs/tokio), Copyright (c) 2023 Tokio Contributors — `basic::poll_fn` and `time::timeout`.
-- [futures-rs](https://github.com/rust-lang/futures-rs), Copyright (c) 2016 Alex Crichton and Copyright (c) 2017 The Tokio Authors — `state_machine::maybe_done`, `composition::fuse`, `composition::map`, `composition::join` and the `fused::FusedFuture` trait.
-- The Rust standard library — `basic::ready` and `basic::pending` mirror `std::future::{ready, pending}`.
+Some modules are derived from tokio, futures-rs and the Rust standard library, all used here under MIT. Their notices, and which file each follows, are in [NOTICE.md](NOTICE.md).

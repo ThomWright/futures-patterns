@@ -44,6 +44,8 @@
 //! assert_eq!(result, 3);
 //! # }
 //! ```
+//!
+//! Follows `tokio/src/future/poll_fn.rs`; see NOTICE.md.
 
 use std::fmt;
 use std::future::Future;

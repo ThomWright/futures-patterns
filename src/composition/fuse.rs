@@ -67,6 +67,8 @@
 //! // Polling again is harmless, and yields nothing ever again.
 //! assert_eq!(poll_once(fused.as_mut(), Waker::noop()), Poll::Pending);
 //! ```
+//!
+//! Follows `futures-util/src/future/future/fuse.rs`; see NOTICE.md.
 
 use crate::fused::FusedFuture;
 use pin_project_lite::pin_project;

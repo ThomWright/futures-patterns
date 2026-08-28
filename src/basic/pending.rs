@@ -31,6 +31,8 @@
 //! let never: i32 = pending().await;
 //! # }
 //! ```
+//!
+//! Follows `core::future::Pending`; see NOTICE.md.
 
 use std::future::Future;
 use std::marker::PhantomData;
