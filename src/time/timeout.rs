@@ -8,18 +8,18 @@
 //! # Pattern overview
 //!
 //! Timeout demonstrates:
-//! - Racing futures with different output types
-//! - Integrating with tokio's timer system (Sleep)
-//! - Result transformation (wrapping success/timeout cases)
-//! - Cooperative scheduling considerations
-//! - How polling order affects behaviour
+//! - Racing futures with different output types.
+//! - Integrating with tokio's timer system (Sleep).
+//! - Result transformation (wrapping success/timeout cases).
+//! - Cooperative scheduling considerations.
+//! - How polling order affects behaviour.
 //!
 //! # Polling strategy
 //!
 //! This implementation polls the value future first, then the delay. This means:
-//! - If the value is ready, we return immediately without checking the timer
-//! - This is more efficient when the operation completes quickly
-//! - It matches tokio's implementation strategy
+//! - If the value is ready, we return immediately without checking the timer.
+//! - This is more efficient when the operation completes quickly.
+//! - It matches tokio's implementation strategy.
 //!
 //! # Cooperative scheduling: deliberately omitted
 //!
@@ -63,10 +63,10 @@
 //! # When to use
 //!
 //! Use this pattern for:
-//! - Network operations that might hang
-//! - User interactions with time limits
-//! - Preventing indefinite blocking
-//! - Implementing retry logic with deadlines
+//! - Network operations that might hang.
+//! - User interactions with time limits.
+//! - Preventing indefinite blocking.
+//! - Implementing retry logic with deadlines.
 //!
 //! # Example
 //!

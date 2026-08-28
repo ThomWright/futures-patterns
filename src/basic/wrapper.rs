@@ -1,10 +1,10 @@
 //! Wrapping an existing future in a newtype.
 //!
 //! This pattern shows how to wrap an existing future to:
-//! - Hide implementation details
-//! - Provide a cleaner, more semantic API
-//! - Avoid exposing complex nested future types
-//! - Create domain-specific future types
+//! - Hide implementation details.
+//! - Provide a cleaner, more semantic API.
+//! - Avoid exposing complex nested future types.
+//! - Create domain-specific future types.
 //!
 //! # The challenge
 //!
@@ -23,10 +23,10 @@
 //!
 //! When working with `Option<Future>` or similar wrapper types, these methods are crucial:
 //!
-//! - `Option::as_pin_mut()` - Converts `Pin<&mut Option<T>>` to `Option<Pin<&mut T>>`
-//! - `Pin::as_mut()` - Converts `&mut Pin<Pointer<T>>` to `Pin<&mut T>` (reborrowing)
-//! - `Pin::new()` - Creates `Pin<&mut T>` when `T: Unpin`
-//! - `self.project()` (from pin-project) - Projects pinned struct to pinned fields
+//! - `Option::as_pin_mut()` - Converts `Pin<&mut Option<T>>` to `Option<Pin<&mut T>>`.
+//! - `Pin::as_mut()` - Converts `&mut Pin<Pointer<T>>` to `Pin<&mut T>` (reborrowing).
+//! - `Pin::new()` - Creates `Pin<&mut T>` when `T: Unpin`.
+//! - `self.project()` (from pin-project) - Projects pinned struct to pinned fields.
 //!
 //! # Two approaches
 //!
@@ -83,10 +83,10 @@
 //! # When to use
 //!
 //! Use this pattern when:
-//! - You want to hide complex future types from your API
-//! - You need domain-specific future types (e.g., `ShutdownSignal`, `TaskComplete`)
-//! - You're building a library and want to avoid exposing implementation details
-//! - You need to add semantic meaning to a generic future
+//! - You want to hide complex future types from your API.
+//! - You need domain-specific future types (e.g., `ShutdownSignal`, `TaskComplete`).
+//! - You're building a library and want to avoid exposing implementation details.
+//! - You need to add semantic meaning to a generic future.
 //!
 //! # Examples
 //!

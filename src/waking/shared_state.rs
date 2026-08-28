@@ -2,8 +2,8 @@
 //!
 //! This builds a one-shot channel: a [`Sender`] hands over a single value, and a
 //! [`Receiver`] is a future that completes when the value arrives. The value can be
-//! sent from any thread, which makes this the first pattern here whose readiness
-//! comes from outside the task polling it.
+//! sent from any thread, so unlike every other pattern here, its readiness comes from
+//! outside.
 //!
 //! # The four rules
 //!
@@ -13,7 +13,7 @@
 //! ## 1. Store the waker before returning `Pending`
 //!
 //! `Poll::Pending` is a promise that the task will be woken later. The only way to
-//! keep that promise is to have stashed the waker somewhere the producer can find it.
+//! keep that promise is to have stored the waker somewhere the producer can find it.
 //! Forget this and the task parks forever -- the bug [`basic::pending`] has by
 //! design.
 //!
@@ -29,8 +29,8 @@
 //! ```
 //!
 //! The value is there and the task is asleep, with nothing left to wake it. This is a
-//! lost wakeup, and it is a genuine race rather than a coding slip -- it needs the two
-//! halves to interleave at exactly that point.
+//! lost wakeup: a genuine race rather than a coding slip, needing the two halves to
+//! interleave at exactly that point.
 //!
 //! Holding one lock across both the check and the store closes the window, which is
 //! what this implementation does. Doing it *without* a lock is harder, and is why
@@ -42,10 +42,11 @@
 //!
 //! ## 3. Keep the newest waker
 //!
-//! A future can be polled by a *different* task than last time, because executors move
-//! work between threads. So the waker handed in on this poll supersedes whatever was
-//! stored before: waking a stale one notifies a task that is no longer waiting, and the
-//! task that *is* waiting never hears anything.
+//! The same future can be polled from a *different* task than last time -- what
+//! `AtomicWaker`'s docs call a consumer "in the process of being migrated to a new
+//! logical task". So the waker handed in on this poll supersedes whatever was stored
+//! before: waking a stale one notifies a task that is no longer waiting, while the task
+//! that *is* waiting hears nothing.
 //!
 //! `AtomicWaker` states the same policy -- "if a new `Waker` instance is produced by
 //! calling `register` before an existing one is consumed, then the existing one is
@@ -54,22 +55,21 @@
 //!
 //! ## 4. Wake after releasing the lock
 //!
-//! This one is about contention rather than lost wakeups, which is why it is separate
-//! from rule 3 despite often appearing in the same few lines of code. Wake while still
-//! holding the lock and the woken task can be scheduled immediately, only to block on
-//! the lock you have not let go of yet.
+//! This one is about contention rather than lost wakeups. Wake while still holding the
+//! lock and the woken task can be scheduled immediately, only to block on the lock you
+//! have not let go of yet.
 //!
 //! It can be worse than slow. If the executor polls the woken task inline on the
 //! waking thread, that poll will try to take a `Mutex` the same thread already holds,
 //! and `std`'s mutexes are not reentrant, so it deadlocks.
 //!
-//! Tokio's `Notify` does this deliberately, taking the waker out under the lock and
-//! then calling `drop(waiters)` before `waker.wake()`.
+//! Tokio's `Notify` avoids all this explicitly: it takes the waker out under the lock,
+//! then calls `drop(waiters)` before `waker.wake()`.
 //!
 //! # What this simplifies
 //!
-//! A `Mutex` around the whole state, where production uses atomics and a lock-free
-//! waker cell. The rules above are the real ones; the locking is the shortcut.
+//! One `Mutex` around the whole state, where production code uses atomics and a
+//! lock-free waker cell. The rules above are the real ones; the lock is the shortcut.
 //!
 //! [`basic::pending`]: crate::basic::pending
 //! [`Waker::will_wake`]: std::task::Waker::will_wake

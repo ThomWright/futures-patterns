@@ -1,7 +1,7 @@
 //! Wait for two futures to finish, and collect both outputs.
 //!
 //! Where [`race`](crate::composition::race) returns as soon as one branch finishes,
-//! `Join` waits for every branch and yields all of their outputs together.
+//! `Join` waits for both and yields their outputs together.
 //!
 //! # Why this needs `MaybeDone`
 //!
@@ -13,7 +13,7 @@
 //!    has to poll *something* for it each round.
 //! 2. Its output has to be kept somewhere, because the result tuple cannot be
 //!    returned until the slowest branch lands.
-//! 3. All the outputs have to be harvested at the end, in one go.
+//! 3. Both outputs have to be collected at the end, in one go.
 //!
 //! [`MaybeDone`](crate::state_machine::maybe_done) exists for exactly this: its `Done`
 //! state absorbs further polls without touching the inner future, holds the output in
@@ -31,8 +31,8 @@
 //! A `select!` loop cannot do this, because it is generic over branches whose
 //! behaviour after completion is unspecified, so it asks
 //! [`FusedFuture::is_terminated`](crate::fused::FusedFuture::is_terminated) first.
-//! `Join` needs no such question, and neither `futures` nor `tokio` asks it in their
-//! own join implementations.
+//! `Join` does not need to ask, and neither `futures` nor `tokio` does so in their own
+//! join implementations.
 //!
 //! # The short-circuit trap
 //!
@@ -45,7 +45,7 @@
 //! `&&` short-circuits, so while `a` is pending, `b` is never polled at all -- it
 //! never registers a waker, and never makes progress. The join then completes only as
 //! fast as `a` allows, and hangs outright if `b` was the branch that would have woken
-//! the task. Polling into separate bindings first, as below, avoids it.
+//! the task. Polling into separate bindings first, as the implementation does, avoids it.
 //!
 //! # How this differs from `tokio::join!`
 //!

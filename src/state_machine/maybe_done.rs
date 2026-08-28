@@ -4,9 +4,9 @@
 //! tracks whether it has completed. It uses an enum with three states to manage
 //! the lifecycle:
 //!
-//! - `Future(Fut)` - The wrapped future hasn't completed yet
-//! - `Done(Fut::Output)` - The future completed, and we're storing its output
-//! - `Gone` - The output has been extracted
+//! - `Future(Fut)` - The wrapped future hasn't completed yet.
+//! - `Done(Fut::Output)` - The future completed, and we're storing its output.
+//! - `Gone` - The output has been extracted.
 //!
 //! # State transitions
 //!
@@ -41,10 +41,10 @@
 //! This pattern is useful for:
 //! - Implementing join/select operations that need to check completion status; see
 //!   [`composition::join`](crate::composition::join), which is built from this and
-//!   whose three problems map one to one onto these three states
-//! - Building futures that need to poll multiple sub-futures
-//! - Caching future results without requiring Clone
-//! - Implementing try_join where you need to store successful results
+//!   whose three problems map one to one onto these three states.
+//! - Building futures that need to poll multiple sub-futures.
+//! - Caching future results without requiring Clone.
+//! - Implementing try_join where you need to store successful results.
 //!
 //! # Example
 //!
@@ -291,7 +291,7 @@ mod tests {
         assert_eq!(poll_once(fut.as_mut(), Waker::noop()), Poll::Ready(()));
 
         assert_eq!(fut.as_mut().take_output(), Some(42));
-        // Now Gone: the value has been harvested and cannot be taken twice.
+        // Now Gone: the value has been taken and cannot be taken again.
         assert_eq!(fut.as_mut().take_output(), None);
     }
 

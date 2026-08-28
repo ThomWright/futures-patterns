@@ -7,10 +7,10 @@
 //! # Pattern overview
 //!
 //! Map demonstrates:
-//! - How to wrap and poll an inner future
-//! - How to transform the output type
-//! - Basic use of `pin-project-lite` for safe pin projection
-//! - How combinators compose futures
+//! - How to wrap and poll an inner future.
+//! - How to transform the output type.
+//! - Basic use of `pin-project-lite` for safe pin projection.
+//! - How combinators compose futures.
 //!
 //! # Pinning strategy
 //!
@@ -21,10 +21,10 @@
 //! # When to use
 //!
 //! Use this pattern when you need to:
-//! - Transform a future's output type
-//! - Apply post-processing to async results
-//! - Build combinator libraries
-//! - Chain operations on futures
+//! - Transform a future's output type.
+//! - Apply post-processing to async results.
+//! - Build combinator libraries.
+//! - Chain operations on futures.
 //!
 //! # Example
 //!

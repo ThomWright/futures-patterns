@@ -22,10 +22,10 @@
 //! # When to use
 //!
 //! This pattern demonstrates:
-//! - How to design a custom state machine
-//! - How state transitions work in practice
-//! - How to store data needed for state transitions
-//! - The basics before moving to more complex patterns
+//! - How to design a custom state machine.
+//! - How state transitions work in practice.
+//! - How to store data needed for state transitions.
+//! - The basics before moving to more complex patterns.
 //!
 //! # Example
 //!

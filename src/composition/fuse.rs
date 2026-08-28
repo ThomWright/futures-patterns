@@ -1,4 +1,4 @@
-//! Let a finished future be polled harmlessly, forever.
+//! Let a finished future be polled harmlessly.
 //!
 //! `Fuse` wraps a future so that polling it after completion is well defined: it
 //! returns `Poll::Pending` rather than panicking or re-polling something that has
@@ -6,8 +6,7 @@
 //!
 //! # What happens, and when
 //!
-//! It is easy to describe this as "always pending afterwards" and lose the fact that
-//! two different polls are involved:
+//! Two different polls are involved, which "always pending afterwards" glosses over:
 //!
 //! - On the poll where the inner future completes, `Fuse` returns
 //!   `Ready(inner_output)` and drops the inner future. The output passes straight
@@ -25,7 +24,7 @@
 //! loops rather than a general "safe to poll again" wrapper. Inside such a loop the
 //! other branches register wakers and the task still gets woken; alone, it hangs.
 //!
-//! # Prefer asking to relying on it
+//! # Ask before polling
 //!
 //! [`FusedFuture::is_terminated`] lets a loop skip a finished branch instead of
 //! polling it and discarding the `Pending`. That is the intended mechanism; the
@@ -45,7 +44,7 @@
 //!
 //! # Relationship to `OptionFuture`
 //!
-//! The shape is [`OptionFuture`](crate::basic::wrapper::OptionFuture) --  a `#[pin]`
+//! The shape is [`OptionFuture`](crate::basic::wrapper::OptionFuture) -- a `#[pin]`
 //! field holding `Option<Fut>` -- and completion clears the slot with `Pin::set`, the
 //! same move as
 //! [`OptionFuture::clear`](crate::basic::wrapper::OptionFuture::clear). Only the empty

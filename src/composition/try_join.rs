@@ -6,9 +6,8 @@
 //!
 //! # Abandoning the other branch
 //!
-//! Short-circuiting is the whole point, and it has a consequence worth being explicit
-//! about: when one branch fails, the other is simply *dropped*, wherever it had got
-//! to. There is no signal to it and no chance for it to finish.
+//! Short-circuiting has a consequence: when one branch fails, the other is *dropped*,
+//! wherever it had got to. There is no signal to it and no chance for it to finish.
 //!
 //! For an in-memory computation that is free. For a branch holding a database
 //! transaction or a half-written request it is not, and whether dropping is safe is
@@ -20,8 +19,8 @@
 //!
 //! A branch that completes has to be *inspected* before the join knows what to do:
 //!
-//! - if it produced an error, take it and return
-//! - if it produced a value, leave the value where it is for the final harvest
+//! - If it produced an error, take it and return.
+//! - If it produced a value, leave the value where it is for the final collection.
 //!
 //! That is a peek, not a move, which is what
 //! [`MaybeDone::output_mut`](crate::state_machine::maybe_done::MaybeDone::output_mut)
