@@ -2,8 +2,8 @@
 //!
 //! This crate provides educational implementations of common Future patterns,
 //! based on real-world examples from tokio and other production async libraries.
-//! Each pattern is implemented with comprehensive documentation explaining the
-//! concepts, trade-offs, and implementation details.
+//! Each pattern is documented with the concepts it depends on, the trade-offs it
+//! makes, and where it diverges from the implementation it is based on.
 //!
 //! # Organization
 //!
@@ -44,7 +44,7 @@
 //!
 //! ## Composition Patterns
 //!
-//! See how to combine futures to create more powerful abstractions:
+//! Build futures that drive other futures:
 //!
 //! - [`composition::map`] - Transform a future's output
 //! - [`composition::race`] - Return the first of two futures to complete
@@ -215,21 +215,28 @@
 //!
 //! Recommended order for learning:
 //!
-//! 1. Start with [`basic::ready`] and [`basic::pending`] to understand the Future trait
-//! 2. Study [`basic::poll_fn`] to learn about pinning and unsafe usage
-//! 3. Read [`basic::wrapper`] for the pinning rules around wrapping a future
-//! 4. Move to [`state_machine::two_state`] for a simple state machine
-//! 5. Build a leaf future in [`waking::shared_state`] to see where readiness
-//!    comes from, and how a waker gets stored for another thread to find
-//! 6. Examine [`state_machine::maybe_done`] for a production-like pattern
-//! 7. Learn composition with [`composition::map`]
-//! 8. Study coordination with [`composition::race`]
-//! 9. See [`composition::join`] for the other way to coordinate two futures, and
-//!    the payoff that justifies [`state_machine::maybe_done`]; then
-//!    [`composition::try_join`], where failing early means abandoning a branch
-//! 10. Read [`composition::fuse`] and [`fused`] for how a type can promise more than
-//!     the `Future` contract requires
-//! 11. Finish with [`time::timeout`] to see everything combined
+//! 1. [`basic::ready`] and [`basic::pending`] -- the two degenerate futures, always
+//!    ready and never ready, which between them show what `poll` has to decide
+//! 2. [`basic::poll_fn`] -- building a future from a closure, and the first point
+//!    where pinning forces `unsafe`
+//! 3. [`basic::wrapper`] -- wrapping someone else's future, and projecting your own
+//!    pinnedness onto it
+//! 4. [`state_machine::two_state`] -- writing the states out by hand, and waking
+//!    yourself
+//! 5. [`waking::shared_state`] -- where readiness comes from: a future parked until
+//!    another thread wakes it
+//! 6. [`state_machine::maybe_done`] -- parking a finished future's output, so that
+//!    several futures can be driven at once
+//! 7. [`composition::map`] -- transforming an output, and why the mapping function
+//!    has to live in an `Option`
+//! 8. [`composition::race`] -- driving two futures and taking the first, and the bias
+//!    any polling order creates
+//! 9. [`composition::join`] and [`composition::try_join`] -- driving two and waiting
+//!    for both; failing early means abandoning a branch
+//! 10. [`composition::fuse`] and [`fused`] -- how a type can promise more than the
+//!     `Future` contract requires
+//! 11. [`time::timeout`] -- racing against a runtime timer, and where a teaching
+//!     implementation stops matching tokio
 //!
 //! # References
 //!
