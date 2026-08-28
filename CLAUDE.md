@@ -4,6 +4,8 @@
 
 Learning the parts of Rust async that are hard, by implementing them: writing `poll` rather than an `async fn`, so that `Pin`, `Waker` and the poll contract stay visible. It is not a library anyone depends on, so **educational clarity beats every other consideration** — including neat testability. If a clearer pattern is harder to test, take the clearer pattern and say what the tests do not cover.
 
+The primary reader is whoever is working on it, but it is public and should read that way. Select and order material on general grounds — what is hard, what the learning path already covers — rather than what any one person happens to have run into.
+
 Scope is async traits generally, not only `Future`: `Stream::poll_next` and tower's `Service::poll_ready` belong here too.
 
 A gitignored `reference/` directory may exist locally, holding source worth reading. Look at what is actually in it rather than assuming. It is not part of this repo, so never cite it, link into it, or assume a reader has it.
