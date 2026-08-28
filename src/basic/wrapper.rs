@@ -10,15 +10,26 @@
 //! the wrapper is pinned the inner future must be pinned too, and getting a
 //! `Pin<&mut Inner>` out of a `Pin<&mut Self>` is what pin projection means.
 //!
-//! # Key methods for working with pinned types
+//! # Getting at a field
 //!
-//! These are the ones that come up:
+//! `Pin<&mut Self>` is not `&mut Self`, so reaching a field is a choice rather than a
+//! dereference, and several of the routes look plausible while only one compiles. Two
+//! questions decide it: is the field structurally pinned, meaning marked `#[pin]`, and
+//! is its type `Unpin`.
 //!
-//! - `Option::as_pin_mut()` - Converts `Pin<&mut Option<T>>` to `Option<Pin<&mut T>>`.
-//! - `Pin::as_mut()` - Converts `&mut Pin<Pointer<T>>` to `Pin<&mut T>` (reborrowing).
-//! - `Pin::new()` - Creates `Pin<&mut T>` when `T: Unpin`.
-//! - `self.project()` (from `pin-project-lite`) - Projects a pinned struct to its
-//!   pinned fields.
+//! | You have | You want | Use |
+//! |---|---|---|
+//! | `Pin<&mut Self>`, field is `#[pin]` | `Pin<&mut F>`, to poll it | `self.project().field` |
+//! | `Pin<&mut Self>`, field is not `#[pin]` | `&mut F`, to call or read it | `self.project().field` |
+//! | `&mut F` where `F: Unpin` | `Pin<&mut F>` | `Pin::new(&mut f)` |
+//! | `Pin<&mut Option<F>>` | `Option<Pin<&mut F>>` | `.as_pin_mut()` |
+//! | `Pin<&mut Self>`, needed again afterwards | a second `Pin<&mut Self>` | `self.as_mut()` |
+//! | `Pin<&mut F>` | to replace the value in place | `.set(new)` |
+//! | none of the above | `&mut Self` | `unsafe { get_unchecked_mut() }` |
+//!
+//! The last row is the escape hatch, and reaching for it usually means one of the first
+//! two answers was wrong. Two places here genuinely need it: `maybe_done` uses
+//! `get_unchecked_mut`, and `poll_fn` the equivalent `Pin::into_inner_unchecked`.
 //!
 //! # Two approaches
 //!

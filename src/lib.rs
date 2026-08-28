@@ -8,7 +8,9 @@
 //!
 //! Doing it by hand means upholding contracts the compiler does not check, and which of
 //! them bites depends on what you are building. Wrapping or storing a future runs into
-//! `Pin`, pin projection, and lifetimes once it borrows. Writing one woken from outside
+//! `Pin`, where `Pin<&mut Self>` is not `&mut Self` and reaching a field becomes a
+//! choice between projection, reborrowing and an `unsafe` escape hatch; and into
+//! lifetimes, once it borrows. Writing one woken from outside
 //! runs into the waker rules, where returning `Pending` is a promise to arrange a wake,
 //! and forgetting it gives you a task that hangs rather than a program that fails to
 //! compile. Writing a combinator runs into the poll contract, and what you are allowed
