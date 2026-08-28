@@ -97,8 +97,17 @@
 //! and the runtime both honour this, so the rule only comes up when writing a
 //! combinator that drives futures itself.
 //!
-//! Because it is the caller's obligation, an implementation may do as it likes when
-//! the rule is broken, and the patterns here deliberately differ:
+//! `Future::poll`'s own documentation is blunt about what happens if you break it:
+//! calling `poll` again "may panic, block forever, or cause other kinds of problems;
+//! the `Future` trait places no requirements on the effects of such a call". The one
+//! hard limit is that it must not be undefined behaviour, since `poll` is not
+//! `unsafe`.
+//!
+//! This is worth being clear about, because it is easy to read the behaviours below
+//! as a *lifecycle* the trait sanctions. It is not one. There is no blessed
+//! `Pending -> Ready -> Pending` sequence; a future returning `Pending` after it has
+//! completed is simply an implementation deciding what to do about a call that should
+//! never have happened. Every option below is a choice about unspecified behaviour:
 //!
 //! - [`basic::ready`] and [`composition::map`] panic. Both consume something on
 //!   completion -- a value, an `FnOnce` -- so there is nothing left to return, and a
@@ -108,6 +117,8 @@
 //! - [`state_machine::maybe_done`] absorbs the extra poll without touching the inner
 //!   future. This is the load-bearing one: it is what lets `join!` poll every branch
 //!   on every wakeup without re-polling the branches that already finished.
+//! - `Fuse`, from the `futures` crate, returns `Pending` from then on, so a finished
+//!   branch quietly drops out of a `select!` loop instead of blowing it up.
 //!
 //! To get the guarantee from an arbitrary future rather than choosing it per type,
 //! there are two tools, and which one you want depends on what a finished future
@@ -126,9 +137,22 @@
 //! `select!` only because the other branches get the task woken, which makes `Fuse` a
 //! select-loop component rather than a general "safe to poll again" wrapper.
 //!
+//! The difference is really about *when the output is delivered relative to
+//! completion*: `MaybeDone` decouples "it has finished" from "give me the value",
+//! while `Fuse` fuses the two into a single event.
+//!
+//! |                 | the completing poll                          | every poll after that            |
+//! |-----------------|----------------------------------------------|----------------------------------|
+//! | `MaybeDone`     | `Ready(())`; output withheld and parked      | `Ready(())`; inner untouched     |
+//! | `Fuse`          | `Ready(output)`; output out, inner dropped   | `Pending`; no waker registered   |
+//!
 //! Neither generalises the other. A join cannot be built on `Fuse`, because there is
 //! nowhere to park an output while a slower branch runs; a select loop built on
 //! `MaybeDone` would spin on branches answering `Ready(())`.
+//!
+//! `futures` also pairs `Fuse` with a `FusedFuture::is_terminated` method, so a
+//! well-behaved `select!` can skip finished branches rather than poll them and rely on
+//! the `Pending`. The graceful `Pending` is the safety net, not the mechanism.
 //!
 //! ## Wakers
 //!
