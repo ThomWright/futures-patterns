@@ -5,10 +5,10 @@
 //! sent from any thread, which makes this the first pattern here whose readiness
 //! comes from outside the task polling it.
 //!
-//! # The three rules
+//! # The four rules
 //!
-//! Almost every leaf future obeys the same three rules, and each one exists because
-//! of a specific way things break.
+//! Almost every leaf future obeys the same four rules, and each one exists because of
+//! a specific way things break.
 //!
 //! ## 1. Store the waker before returning `Pending`
 //!
@@ -40,17 +40,31 @@
 //! the result of a computation and producers should call `wake` after producing" --
 //! the ordering matters precisely because there is no lock to make it moot.
 //!
-//! ## 3. Replace the stored waker on every poll, and wake outside the lock
+//! ## 3. Keep the newest waker
 //!
-//! A future can be polled by a *different* task than last time, because executors
-//! move work between threads. The stored waker must therefore be the most recent one;
-//! waking a stale waker notifies a task that is no longer waiting. [`Waker::will_wake`]
-//! lets you skip the clone when nothing has changed.
+//! A future can be polled by a *different* task than last time, because executors move
+//! work between threads. So the waker handed in on this poll supersedes whatever was
+//! stored before: waking a stale one notifies a task that is no longer waiting, and the
+//! task that *is* waiting never hears anything.
 //!
-//! Waking should also happen after releasing the lock. Wake while still holding it and
-//! the woken task can be scheduled immediately, only to block on the very lock its
-//! waker is holding. Tokio's `Notify` is explicit about this, calling `drop(waiters)`
-//! before `waker.wake()`.
+//! `AtomicWaker` states the same policy -- "if a new `Waker` instance is produced by
+//! calling `register` before an existing one is consumed, then the existing one is
+//! overwritten". [`Waker::will_wake`] lets you skip the clone when the task has not
+//! actually changed, which is the common case.
+//!
+//! ## 4. Wake after releasing the lock
+//!
+//! This one is about contention rather than lost wakeups, which is why it is separate
+//! from rule 3 despite often appearing in the same few lines of code. Wake while still
+//! holding the lock and the woken task can be scheduled immediately, only to block on
+//! the lock you have not let go of yet.
+//!
+//! It can be worse than slow. If the executor polls the woken task inline on the
+//! waking thread, that poll will try to take a `Mutex` the same thread already holds,
+//! and `std`'s mutexes are not reentrant, so it deadlocks.
+//!
+//! Tokio's `Notify` does this deliberately, taking the waker out under the lock and
+//! then calling `drop(waiters)` before `waker.wake()`.
 //!
 //! # What this simplifies
 //!
@@ -141,7 +155,7 @@ impl<T> Sender<T> {
     /// Takes `self` by value, so a channel carries at most one value.
     pub fn send(self, value: T) {
         // The waker is taken out under the lock but woken after it is released; see
-        // rule 3. Waking while holding the lock invites the woken task to block on it.
+        // rule 4. Waking while holding the lock invites the woken task to block on it.
         let waker = {
             let mut shared = self.lock();
             shared.value = Some(value);
