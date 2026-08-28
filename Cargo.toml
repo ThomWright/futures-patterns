@@ -3,7 +3,7 @@ name = "futures-patterns"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-description = "Async patterns implemented by writing poll rather than async fn, and explained"
+description = "Async patterns built on poll, Pin and Waker, explained"
 repository = "https://github.com/ThomWright/futures-patterns"
 
 # Not a crates.io crate; it exists to be read, not depended on.

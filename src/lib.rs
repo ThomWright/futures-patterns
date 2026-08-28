@@ -1,9 +1,12 @@
-//! A collection of patterns for implementing Futures in Rust.
+//! Async patterns built on `poll`, `Pin` and `Waker`, explained.
 //!
-//! This crate provides educational implementations of common Future patterns,
-//! based on real-world examples from tokio and other production async libraries.
-//! Each pattern is documented with the concepts it depends on, the trade-offs it
-//! makes, and where it diverges from the implementation it is based on.
+//! An `async fn` hides the state machine the compiler generates for it. Writing
+//! `poll` directly puts `Pin`, `Waker` and the poll contract back in view, which is
+//! the point: every pattern here exists to explain one of them.
+//!
+//! Some follow a production implementation closely and say which. Others are invented
+//! to isolate a single idea. Either way each is documented with the concepts it
+//! depends on, the trade-offs it makes, and what it simplifies.
 //!
 //! # Organisation
 //!
@@ -237,13 +240,14 @@
 //!
 //! # References
 //!
-//! These implementations are based on patterns from:
+//! Worth reading alongside this:
 //!
-//! - [tokio](https://github.com/tokio-rs/tokio) - production async runtime
+//! - [tokio](https://github.com/tokio-rs/tokio)
+//! - [futures-rs](https://github.com/rust-lang/futures-rs)
 //! - The Rust async book
-//! - Real-world async codebases
 //!
-//! Each module includes references to the original implementations where applicable.
+//! A module derived from one of them says so in its own docs, and `NOTICE.md` records
+//! which file each follows.
 
 pub mod basic;
 pub mod composition;

@@ -1,8 +1,10 @@
 # futures-patterns
 
-A collection of patterns for implementing `Futures` in Rust.
+Async patterns built on `poll`, `Pin` and `Waker`, explained.
 
-This crate provides educational implementations of common Future patterns, based on real-world examples from tokio and other production async libraries. Each pattern is documented with the concepts it depends on, the trade-offs it makes, and where it diverges from the implementation it is based on.
+An `async fn` hides the state machine the compiler generates for it. Writing `poll` directly puts `Pin`, `Waker` and the poll contract back in view, which is the point: every pattern here exists to explain one of them.
+
+Some follow a production implementation closely and say which. Others are invented to isolate a single idea. Either way each is documented with the concepts it depends on, the trade-offs it makes, and what it simplifies.
 
 ## Patterns implemented
 
@@ -68,11 +70,12 @@ Run `cargo test` to check them. Most of the explanation lives in doc comments, s
 
 ## References
 
-Based on implementations from:
+Worth reading alongside this. Where a module is derived from one of them rather than merely informed by it, [NOTICE.md](NOTICE.md) says so.
 
 - [tokio](https://github.com/tokio-rs/tokio)
+- [futures-rs](https://github.com/rust-lang/futures-rs)
 - [tower](https://github.com/tower-rs/tower)
-- [linkerd-proxy](https://github.com/linkerd/linkerd2-proxy)
+- [linkerd2-proxy](https://github.com/linkerd/linkerd2-proxy)
 
 ## License
 
