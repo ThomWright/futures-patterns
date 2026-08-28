@@ -219,7 +219,8 @@
 //! 2. [`basic::poll_fn`] -- a future from a closure. The first place pinning forces
 //!    `unsafe`.
 //! 3. [`basic::wrapper`] -- wrapping another future, and pin projection.
-//! 4. [`state_machine::two_state`] -- states written out by hand, and waking yourself.
+//! 4. [`state_machine::two_state`] -- states written out by hand, and asking to be
+//!    polled again.
 //! 5. [`waking::shared_state`] -- a future that waits until another thread wakes it.
 //!    Where readiness comes from.
 //! 6. [`state_machine::maybe_done`] -- keeping a finished future's output while the
@@ -227,10 +228,10 @@
 //! 7. [`composition::map`] -- transforming another future's output.
 //! 8. [`composition::race`] -- whichever of two finishes first, and why the polling
 //!    order matters.
-//! 9. [`composition::join`] and [`composition::try_join`] -- waiting for both. Failing
-//!    early means abandoning a branch.
-//! 10. [`composition::fuse`] and [`fused`] -- promising more than the `Future` contract
-//!     requires.
+//! 9. [`composition::join`] -- waiting for both. Then [`composition::try_join`],
+//!    where failing early means abandoning a branch.
+//! 10. [`composition::fuse`] -- promising more than the `Future` contract requires,
+//!     and [`fused`] for saying so.
 //! 11. [`time::timeout`] -- racing against the runtime's timer. The first pattern that
 //!     needs a runtime.
 //!
