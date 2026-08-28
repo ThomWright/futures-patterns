@@ -49,6 +49,7 @@
 //! - [`composition::map`] - Transform a future's output
 //! - [`composition::race`] - Return the first of two futures to complete
 //! - [`composition::join`] - Wait for two futures and collect both outputs
+//! - [`composition::try_join`] - The same, but stop at the first error
 //!
 //! Composition is key to building complex async operations from simple pieces.
 //! These patterns introduce pin projection and coordinating multiple futures.
@@ -108,8 +109,20 @@
 //!   future. This is the load-bearing one: it is what lets `join!` poll every branch
 //!   on every wakeup without re-polling the branches that already finished.
 //!
-//! When you need this guarantee from an arbitrary future rather than choosing it per
-//! type, the usual tool is a `Fuse` combinator, which latches on completion.
+//! To get the guarantee from an arbitrary future rather than choosing it per type,
+//! there are two tools, and which one you want depends on what a finished future
+//! should report and whether its output needs keeping:
+//!
+//! - [`state_machine::maybe_done`] answers `Ready(())`, meaning "I am finished", and
+//!   parks the output for collection later. That is what a join needs: it must know
+//!   every branch is done before it can build the result.
+//! - `Fuse`, from the `futures` crate, answers `Pending` forever and passes the output
+//!   straight through on the completing poll, keeping nothing. That is what a select
+//!   loop needs: a finished branch should simply stop being chosen.
+//!
+//! Neither generalises the other. A join cannot be built on `Fuse`, because there is
+//! nowhere to park an output while a slower branch runs; a select loop built on
+//! `MaybeDone` would spin on branches answering `Ready(())`.
 //!
 //! ## Wakers
 //!
@@ -199,7 +212,8 @@
 //! 7. Learn composition with [`composition::map`]
 //! 8. Study coordination with [`composition::race`]
 //! 9. See [`composition::join`] for the other way to coordinate two futures, and
-//!    the payoff that justifies [`state_machine::maybe_done`]
+//!    the payoff that justifies [`state_machine::maybe_done`]; then
+//!    [`composition::try_join`], where failing early means abandoning a branch
 //! 10. Finish with [`time::timeout`] to see everything combined
 //!
 //! # References

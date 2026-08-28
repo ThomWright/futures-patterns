@@ -6,7 +6,10 @@
 //! whichever finishes first, which means deciding a polling order and living with
 //! the bias that creates. [`join`] also drives two at once, but waits for both, which
 //! is what [`maybe_done`](crate::state_machine::maybe_done) exists to make possible.
+//! [`try_join`] adds failure to that: it returns the first error without waiting for
+//! the other branch, which means abandoning it mid-flight.
 
 pub mod join;
+pub mod try_join;
 pub mod map;
 pub mod race;
