@@ -1,14 +1,12 @@
 # futures-patterns
 
-Repo-specific notes. The global `~/.claude/CLAUDE.md` still applies.
-
 ## What this crate is for
 
 Learning the parts of Rust async that are hard, by implementing them by hand. It is not a library anyone depends on, so **educational clarity beats every other consideration** — including neat testability. If a clearer pattern is harder to test, take the clearer pattern and say what the tests do not cover.
 
 Scope is async traits generally, not only `Future`: `Stream::poll_next` and tower's `Service::poll_ready` belong here too.
 
-`reference/` holds tokio, tower, linkerd2 and linkerd2-proxy checkouts. It is gitignored, so never link into it from committed files, and never assume a reader has it.
+There may be a local, gitignored `reference/` directory holding checkouts of tokio, tower and linkerd2-proxy. It is not part of this repo and exists on one machine. Read it to check claims; never cite it, link into it, or assume anyone else has it.
 
 ## Prose
 
@@ -45,7 +43,7 @@ Each module should answer, roughly in this order:
 - What it does, in a sentence.
 - Why it is shaped the way it is — the failure that each design decision prevents. This is the part worth the words.
 - What it simplifies compared with the real implementation, and what that costs. Never quietly simplify.
-- Where the original lives, cited by path within `reference/` so a claim can be checked.
+- Where the original lives, named so that anyone can find it: a crate plus a path inside *that* crate, such as `tokio/src/time/timeout.rs`, or a type path such as `futures_util::future::Fuse`.
 
 Ground claims about production code in the source rather than from memory. Quote it when the wording matters; several confident paraphrases have turned out to be wrong.
 
