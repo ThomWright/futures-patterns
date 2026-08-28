@@ -8,11 +8,11 @@
 //! # Pattern overview
 //!
 //! Timeout demonstrates:
-//! - Racing futures with different output types.
-//! - Integrating with tokio's timer system (Sleep).
-//! - Result transformation (wrapping success/timeout cases).
-//! - Cooperative scheduling considerations.
-//! - How polling order affects behaviour.
+//! - Racing futures with different output types
+//! - Integrating with tokio's timer system (Sleep)
+//! - Result transformation (wrapping success/timeout cases)
+//! - Cooperative scheduling considerations
+//! - How polling order affects behaviour
 //!
 //! # Polling strategy
 //!
@@ -63,10 +63,10 @@
 //! # When to use
 //!
 //! Use this pattern for:
-//! - Network operations that might hang.
-//! - User interactions with time limits.
-//! - Preventing indefinite blocking.
-//! - Implementing retry logic with deadlines.
+//! - Network operations that might hang
+//! - User interactions with time limits
+//! - Preventing indefinite blocking
+//! - Implementing retry logic with deadlines
 //!
 //! # Example
 //!

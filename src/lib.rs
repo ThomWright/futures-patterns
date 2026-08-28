@@ -80,17 +80,17 @@
 //! Futures often need to be pinned in memory because they can contain self-referential
 //! data. Different patterns demonstrate different pinning strategies:
 //!
-//! - Manual unsafe pinning (in `poll_fn`).
-//! - Conditional `Unpin` implementation (in `maybe_done`).
-//! - `pin-project-lite` for safe projection (in `map`, `race`, `timeout`).
+//! - Manual unsafe pinning (in `poll_fn`)
+//! - Conditional `Unpin` implementation (in `maybe_done`)
+//! - `pin-project-lite` for safe projection (in `map`, `race`, `timeout`)
 //!
 //! ## State management
 //!
 //! Futures are state machines. The state machine patterns show how to:
 //!
-//! - Use enums to represent different states.
-//! - Transition between states during polling.
-//! - Store and extract values at different stages.
+//! - Use enums to represent different states
+//! - Transition between states during polling
+//! - Store and extract values at different stages
 //!
 //! ## Polling after completion
 //!
@@ -142,11 +142,11 @@
 //! When a future returns `Poll::Pending`, it must arrange for the task to be
 //! woken when progress can be made. The patterns show:
 //!
-//! - When to call `wake()` (in `two_state`).
-//! - When NOT to call `wake()` (in `pending`).
-//! - How wakers are handled by composed futures.
+//! - When to call `wake()` (in `two_state`)
+//! - When NOT to call `wake()` (in `pending`)
+//! - How wakers are handled by composed futures
 //! - How to store one so another thread can wake you (in `waking::shared_state`),
-//!   which is the case the other three avoid.
+//!   which is the case the other three avoid
 //!
 //! # Examples
 //!
@@ -239,9 +239,9 @@
 //!
 //! These implementations are based on patterns from:
 //!
-//! - [tokio](https://github.com/tokio-rs/tokio) - production async runtime.
-//! - The Rust async book.
-//! - Real-world async codebases.
+//! - [tokio](https://github.com/tokio-rs/tokio) - production async runtime
+//! - The Rust async book
+//! - Real-world async codebases
 //!
 //! Each module includes references to the original implementations where applicable.
 

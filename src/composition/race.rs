@@ -7,26 +7,26 @@
 //! # Pattern overview
 //!
 //! Race demonstrates:
-//! - Polling multiple futures in a single poll call.
-//! - Using enums to represent which future won.
-//! - Pin projection with multiple pinned fields.
-//! - How to coordinate independent async operations.
+//! - Polling multiple futures in a single poll call
+//! - Using enums to represent which future won
+//! - Pin projection with multiple pinned fields
+//! - How to coordinate independent async operations
 //!
 //! # Polling order
 //!
 //! This implementation polls `left` first, then `right`. If `left` is ready,
 //! we return immediately without polling `right`. This means:
 //! - If both futures are ready, `left` wins.
-//! - This can be useful for prioritization.
+//! - This can be useful for prioritisation.
 //! - Timeout patterns typically rely on this behaviour.
 //!
 //! # When to use
 //!
 //! Use this pattern for:
-//! - Implementing timeouts (race with a timer).
-//! - Providing alternative paths (try A, fall back to B).
-//! - Implementing cancellation (race with a cancel signal).
-//! - Building select/choice operations.
+//! - Implementing timeouts (race with a timer)
+//! - Providing alternative paths (try A, fall back to B)
+//! - Implementing cancellation (race with a cancel signal)
+//! - Building select/choice operations
 //!
 //! # Example
 //!

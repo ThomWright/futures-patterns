@@ -6,10 +6,10 @@
 //! # When to use
 //!
 //! This pattern is useful for:
-//! - Testing timeout behaviour.
-//! - Creating placeholder futures during development.
-//! - Demonstrating async control flow.
-//! - Race conditions where one branch should never complete.
+//! - Testing timeout behaviour
+//! - Creating placeholder futures during development
+//! - Demonstrating async control flow
+//! - Race conditions where one branch should never complete
 //!
 //! # Important note on Wakers
 //!

@@ -41,10 +41,10 @@
 //! This pattern is useful for:
 //! - Implementing join/select operations that need to check completion status; see
 //!   [`composition::join`](crate::composition::join), which is built from this and
-//!   whose three problems map one to one onto these three states.
-//! - Building futures that need to poll multiple sub-futures.
-//! - Caching future results without requiring Clone.
-//! - Implementing try_join where you need to store successful results.
+//!   whose three problems map one to one onto these three states
+//! - Building futures that need to poll multiple sub-futures
+//! - Caching future results without requiring Clone
+//! - Implementing try_join where you need to store successful results
 //!
 //! # Example
 //!

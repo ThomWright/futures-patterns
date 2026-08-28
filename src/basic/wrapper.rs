@@ -1,10 +1,10 @@
 //! Wrapping an existing future in a newtype.
 //!
 //! This pattern shows how to wrap an existing future to:
-//! - Hide implementation details.
-//! - Provide a cleaner, more semantic API.
-//! - Avoid exposing complex nested future types.
-//! - Create domain-specific future types.
+//! - Hide implementation details
+//! - Provide a cleaner, more semantic API
+//! - Avoid exposing complex nested future types
+//! - Create domain-specific future types
 //!
 //! # The challenge
 //!
@@ -83,10 +83,10 @@
 //! # When to use
 //!
 //! Use this pattern when:
-//! - You want to hide complex future types from your API.
-//! - You need domain-specific future types (e.g., `ShutdownSignal`, `TaskComplete`).
-//! - You're building a library and want to avoid exposing implementation details.
-//! - You need to add semantic meaning to a generic future.
+//! - You want to hide complex future types from your API
+//! - You need domain-specific future types (e.g., `ShutdownSignal`, `TaskComplete`)
+//! - You're building a library and want to avoid exposing implementation details
+//! - You need to add semantic meaning to a generic future
 //!
 //! # Examples
 //!
