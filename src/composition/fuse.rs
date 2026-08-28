@@ -20,9 +20,9 @@
 //! `Fuse` on its own parks the task forever, exactly like
 //! [`basic::pending`](crate::basic::pending).
 //!
-//! That is not a flaw, but it does mean `Fuse` is a component for `select!`-style
-//! loops rather than a general "safe to poll again" wrapper. Inside such a loop the
-//! other branches register wakers and the task still gets woken; alone, it hangs.
+//! `Fuse` is therefore a component for `select!`-style loops rather than a general
+//! "safe to poll again" wrapper. Inside such a loop the other branches register wakers
+//! and the task still gets woken; alone, it hangs.
 //!
 //! # Ask before polling
 //!

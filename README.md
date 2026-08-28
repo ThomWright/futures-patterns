@@ -5,7 +5,11 @@
 
 Async patterns built on `poll`, `Pin` and `Waker`, explained.
 
-An `async fn` hides the state machine the compiler generates for it. Writing `poll` directly puts `Pin`, `Waker` and the poll contract back in view, which is the point: every pattern here exists to explain one of them.
+`async fn` is simpler, more ergonomic, and the right default. But some things cannot be written that way: a future you need to name, so it can sit in a struct field or have traits implemented on it; a leaf future woken by something outside the async world; a combinator driving several futures at once; or a type whose behaviour after completion is part of its contract.
+
+Doing it by hand means upholding contracts the compiler does not check, and which of them bites depends on what you are building. Wrapping or storing a future runs into `Pin`, pin projection, and lifetimes once it borrows. Writing one woken from outside runs into the waker rules, where returning `Pending` is a promise to arrange a wake, and forgetting it gives you a task that hangs rather than a program that fails to compile. Writing a combinator runs into the poll contract, and what you are allowed to do to a future that has already finished.
+
+Every pattern here exists to explain one of those.
 
 Some follow a production implementation closely and say which. Others are invented to isolate a single idea. Either way each is documented with the concepts it depends on, the trade-offs it makes, and what it simplifies.
 
