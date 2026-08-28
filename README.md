@@ -1,5 +1,8 @@
 # futures-patterns
 
+> [!NOTE]
+> This is very WIP and also very vibe-coded.
+
 Async patterns built on `poll`, `Pin` and `Waker`, explained.
 
 An `async fn` hides the state machine the compiler generates for it. Writing `poll` directly puts `Pin`, `Waker` and the poll contract back in view, which is the point: every pattern here exists to explain one of them.
