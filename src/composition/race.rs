@@ -18,7 +18,7 @@
 //! we return immediately without polling `right`. This means:
 //! - If both futures are ready, `left` wins
 //! - This can be useful for prioritization
-//! - Timeout patterns typically rely on this behavior
+//! - Timeout patterns typically rely on this behaviour
 //!
 //! # When to use
 //!

@@ -6,7 +6,7 @@
 //! - Avoid exposing complex nested future types
 //! - Create domain-specific future types
 //!
-//! # The Challenge
+//! # The challenge
 //!
 //! When you have a future (like `Notified` from tokio::sync::Notify or
 //! `Receiver` from a channel) and want to wrap it in a custom type, you need to:
@@ -19,7 +19,7 @@
 //! The tricky part is pinning - when your wrapper is pinned, you need to project
 //! that pin to the inner future safely.
 //!
-//! # Key Methods for Working with Pinned Types
+//! # Key methods for working with pinned types
 //!
 //! When working with `Option<Future>` or similar wrapper types, these methods are crucial:
 //!
@@ -28,7 +28,7 @@
 //! - `Pin::new()` - Creates `Pin<&mut T>` when `T: Unpin`
 //! - `self.project()` (from pin-project) - Projects pinned struct to pinned fields
 //!
-//! # Two Approaches
+//! # Two approaches
 //!
 //! ## 1. Simple wrapper (when inner future is Unpin)
 //!

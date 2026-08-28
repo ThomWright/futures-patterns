@@ -23,7 +23,7 @@
 //!
 //! Use this pattern when:
 //! - You need custom polling logic without defining a new type
-//! - You're prototyping async behavior
+//! - You're prototyping async behaviour
 //! - You need to integrate with non-standard async sources
 //! - You want to manually control when a future becomes ready
 //!

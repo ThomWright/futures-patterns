@@ -6,7 +6,7 @@
 //! # When to use
 //!
 //! This pattern is useful for:
-//! - Testing timeout behavior
+//! - Testing timeout behaviour
 //! - Creating placeholder futures during development
 //! - Demonstrating async control flow
 //! - Race conditions where one branch should never complete
@@ -58,7 +58,7 @@ pub struct Pending<T> {
 /// Creates a future that never resolves.
 ///
 /// This future will always return `Poll::Pending` when polled. It's useful for
-/// testing timeout behavior or representing futures that should never complete.
+/// testing timeout behaviour or representing futures that should never complete.
 ///
 /// # Example
 ///

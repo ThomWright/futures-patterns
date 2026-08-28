@@ -5,30 +5,30 @@
 //! Each pattern is documented with the concepts it depends on, the trade-offs it
 //! makes, and where it diverges from the implementation it is based on.
 //!
-//! # Organization
+//! # Organisation
 //!
-//! The patterns are organized by complexity:
+//! The patterns are organised by complexity:
 //!
-//! ## Basic Patterns
+//! ## Basic patterns
 //!
 //! Start here to understand the fundamentals of the Future trait:
 //!
-//! - [`basic::ready`] - A future that immediately returns a value
-//! - [`basic::pending`] - A future that never completes
-//! - [`basic::poll_fn`] - Wrap a closure into a future
-//! - [`basic::wrapper`] - Wrap an existing future in a newtype
+//! - [`basic::ready`] - A future that immediately returns a value.
+//! - [`basic::pending`] - A future that never completes.
+//! - [`basic::poll_fn`] - Wrap a closure into a future.
+//! - [`basic::wrapper`] - Wrap an existing future in a newtype.
 //!
 //! These demonstrate the basic structure of futures and introduce concepts like
 //! polling, wakers, and pinning.
 //!
-//! ## State Machine Patterns
+//! ## State machine patterns
 //!
 //! Learn how to build futures with internal state transitions:
 //!
-//! - [`state_machine::maybe_done`] - Track whether a future has completed
-//! - [`state_machine::two_state`] - Simple countdown state machine
+//! - [`state_machine::maybe_done`] - Track whether a future has completed.
+//! - [`state_machine::two_state`] - Simple countdown state machine.
 //!
-//! State machines are fundamental to implementing complex async behavior. These
+//! State machines are fundamental to implementing complex async behaviour. These
 //! examples show how to use enums to represent different states and manage
 //! transitions during polling.
 //!
@@ -36,44 +36,44 @@
 //!
 //! Where readiness comes from in the first place:
 //!
-//! - [`waking::shared_state`] - A future woken by another thread
+//! - [`waking::shared_state`] - A future woken by another thread.
 //!
 //! Every other pattern here completes immediately, wakes itself, or forwards a poll
 //! to a future underneath it. This one parks and is woken by something external,
 //! which is what leaf futures do and what the rest are ultimately built on.
 //!
-//! ## Composition Patterns
+//! ## Composition patterns
 //!
 //! Build futures that drive other futures:
 //!
-//! - [`composition::map`] - Transform a future's output
-//! - [`composition::race`] - Return the first of two futures to complete
-//! - [`composition::join`] - Wait for two futures and collect both outputs
-//! - [`composition::try_join`] - The same, but stop at the first error
-//! - [`composition::fuse`] - Make polling after completion harmless
+//! - [`composition::map`] - Transform a future's output.
+//! - [`composition::race`] - Return the first of two futures to complete.
+//! - [`composition::join`] - Wait for two futures and collect both outputs.
+//! - [`composition::try_join`] - The same, but stop at the first error.
+//! - [`composition::fuse`] - Make polling after completion harmless.
 //!
 //! Composition is key to building complex async operations from simple pieces.
 //! These patterns introduce pin projection and coordinating multiple futures.
 //!
-//! ## Time-Based Patterns
+//! ## Time-based patterns
 //!
 //! Work with time and deadlines using tokio's timer infrastructure:
 //!
-//! - [`time::timeout`] - Require a future to complete within a time limit
+//! - [`time::timeout`] - Require a future to complete within a time limit.
 //!
 //! This demonstrates integration with runtime services and practical patterns
 //! for real-world async code.
 //!
 //! ## Testing
 //!
-//! - [`testing`] - Poll futures by hand, and count wakes
+//! - [`testing`] - Poll futures by hand, and count wakes.
 //!
 //! `.await` only reveals a future's final output. These helpers drive a future one
 //! poll at a time so tests can assert on the whole poll sequence -- how many polls
 //! it took, and whether the task was woken when it should have been. That is where
 //! the subtle bugs in a `Future` impl actually live.
 //!
-//! # Key Concepts
+//! # Key concepts
 //!
 //! ## Pinning
 //!
@@ -84,7 +84,7 @@
 //! - Conditional `Unpin` implementation (in `maybe_done`)
 //! - `pin-project-lite` for safe projection (in `map`, `race`, `timeout`)
 //!
-//! ## State Management
+//! ## State management
 //!
 //! Futures are state machines. The state machine patterns show how to:
 //!
@@ -110,12 +110,12 @@
 //! completed is simply an implementation deciding what to do about a call that should
 //! never have happened. Every option below is a choice about unspecified behaviour:
 //!
-//! - [`basic::ready`] and [`composition::map`] panic. Both consume something on
+//! - [`basic::ready`] and [`composition::map`] panic. Both consume something on.
 //!   completion -- a value, an `FnOnce` -- so there is nothing left to return, and a
 //!   panic beats a silent wrong answer.
-//! - [`state_machine::two_state`] keeps returning the same value. It is idempotent
+//! - [`state_machine::two_state`] keeps returning the same value. It is idempotent.
 //!   because it stores its output rather than moving it out.
-//! - [`state_machine::maybe_done`] absorbs the extra poll without touching the inner
+//! - [`state_machine::maybe_done`] absorbs the extra poll without touching the inner.
 //!   future. This is the load-bearing one: it is what lets `join!` poll every branch
 //!   on every wakeup without re-polling the branches that already finished.
 //! - `Fuse`, from the `futures` crate, returns `Pending` from then on, so a finished
@@ -211,40 +211,35 @@
 //! # }
 //! ```
 //!
-//! # Learning Path
+//! # Learning path
 //!
 //! Recommended order for learning:
 //!
-//! 1. [`basic::ready`] and [`basic::pending`] -- the two degenerate futures, always
-//!    ready and never ready, which between them show what `poll` has to decide
-//! 2. [`basic::poll_fn`] -- building a future from a closure, and the first point
-//!    where pinning forces `unsafe`
-//! 3. [`basic::wrapper`] -- wrapping someone else's future, and projecting your own
-//!    pinnedness onto it
-//! 4. [`state_machine::two_state`] -- writing the states out by hand, and waking
-//!    yourself
-//! 5. [`waking::shared_state`] -- where readiness comes from: a future parked until
-//!    another thread wakes it
-//! 6. [`state_machine::maybe_done`] -- parking a finished future's output, so that
-//!    several futures can be driven at once
-//! 7. [`composition::map`] -- transforming an output, and why the mapping function
-//!    has to live in an `Option`
-//! 8. [`composition::race`] -- driving two futures and taking the first, and the bias
-//!    any polling order creates
-//! 9. [`composition::join`] and [`composition::try_join`] -- driving two and waiting
-//!    for both; failing early means abandoning a branch
-//! 10. [`composition::fuse`] and [`fused`] -- how a type can promise more than the
-//!     `Future` contract requires
-//! 11. [`time::timeout`] -- racing against a runtime timer, and where a teaching
-//!     implementation stops matching tokio
+//! 1. [`basic::ready`] and [`basic::pending`] -- always ready, and never ready.
+//! 2. [`basic::poll_fn`] -- a future from a closure. The first place pinning forces
+//!    `unsafe`.
+//! 3. [`basic::wrapper`] -- wrapping another future, and projecting pinnedness onto it.
+//! 4. [`state_machine::two_state`] -- states written out by hand, and waking yourself.
+//! 5. [`waking::shared_state`] -- where readiness comes from: parked until another
+//!    thread wakes you.
+//! 6. [`state_machine::maybe_done`] -- parking a finished future's output.
+//! 7. [`composition::map`] -- transforming an output. Why the function lives in an
+//!    `Option`.
+//! 8. [`composition::race`] -- first of two wins, and the bias that creates.
+//! 9. [`composition::join`] and [`composition::try_join`] -- waiting for both. Failing
+//!    early means abandoning a branch.
+//! 10. [`composition::fuse`] and [`fused`] -- promising more than the `Future` contract
+//!     requires.
+//! 11. [`time::timeout`] -- racing a runtime timer, and where this stops matching
+//!     tokio.
 //!
 //! # References
 //!
 //! These implementations are based on patterns from:
 //!
-//! - [tokio](https://github.com/tokio-rs/tokio) - Production async runtime
-//! - The Rust async book
-//! - Real-world async codebases
+//! - [tokio](https://github.com/tokio-rs/tokio) - production async runtime.
+//! - The Rust async book.
+//! - Real-world async codebases.
 //!
 //! Each module includes references to the original implementations where applicable.
 

@@ -12,7 +12,7 @@
 //! - Integrating with tokio's timer system (Sleep)
 //! - Result transformation (wrapping success/timeout cases)
 //! - Cooperative scheduling considerations
-//! - How polling order affects behavior
+//! - How polling order affects behaviour
 //!
 //! # Polling strategy
 //!
