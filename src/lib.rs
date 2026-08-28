@@ -48,6 +48,7 @@
 //!
 //! - [`composition::map`] - Transform a future's output
 //! - [`composition::race`] - Return the first of two futures to complete
+//! - [`composition::join`] - Wait for two futures and collect both outputs
 //!
 //! Composition is key to building complex async operations from simple pieces.
 //! These patterns introduce pin projection and coordinating multiple futures.
@@ -197,7 +198,9 @@
 //! 6. Examine [`state_machine::maybe_done`] for a production-like pattern
 //! 7. Learn composition with [`composition::map`]
 //! 8. Study coordination with [`composition::race`]
-//! 9. Finish with [`time::timeout`] to see everything combined
+//! 9. See [`composition::join`] for the other way to coordinate two futures, and
+//!    the payoff that justifies [`state_machine::maybe_done`]
+//! 10. Finish with [`time::timeout`] to see everything combined
 //!
 //! # References
 //!

@@ -28,6 +28,7 @@ Every other pattern here completes immediately, wakes itself, or forwards a poll
 
 - **Map** - Transform a future's output
 - **Race** - Return the first of two futures to complete
+- **Join** - Wait for two futures and collect both outputs
 
 ### Time-Based Patterns
 
@@ -51,7 +52,8 @@ Recommended order for understanding the patterns:
 6. Examine `state_machine::maybe_done` for a production-like pattern
 7. Learn composition with `composition::map`
 8. Study coordination with `composition::race`
-9. Finish with `time::timeout` to see everything combined
+9. See `composition::join` for the other way to coordinate two futures, and the payoff that justifies `state_machine::maybe_done`
+10. Finish with `time::timeout` to see everything combined
 
 `testing` is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
 

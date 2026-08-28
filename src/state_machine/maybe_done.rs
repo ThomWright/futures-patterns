@@ -30,7 +30,9 @@
 //! # When to use
 //!
 //! This pattern is useful for:
-//! - Implementing join/select operations that need to check completion status
+//! - Implementing join/select operations that need to check completion status; see
+//!   [`composition::join`](crate::composition::join), which is built from this and
+//!   whose three problems map one to one onto these three states
 //! - Building futures that need to poll multiple sub-futures
 //! - Caching future results without requiring Clone
 //! - Implementing try_join where you need to store successful results
@@ -308,49 +310,6 @@ mod tests {
     fn output_mut_is_none_unless_done() {
         let mut fut = Box::pin(maybe_done(CountDown::new(3)));
         assert!(fut.as_mut().output_mut().is_none());
-    }
-
-    /// A two-branch join, built the way `tokio::join!` builds an N-branch one.
-    ///
-    /// Both branches are polled every round, completed branches park their output,
-    /// and the outputs are harvested together at the end. Awaiting the branches in
-    /// sequence instead would run them one after the other.
-    fn join2<A: Future, B: Future>(a: A, b: B) -> (A::Output, B::Output, usize) {
-        let mut a = Box::pin(maybe_done(a));
-        let mut b = Box::pin(maybe_done(b));
-
-        let mut rounds = 0;
-        loop {
-            rounds += 1;
-            let a_done = poll_once(a.as_mut(), Waker::noop()).is_ready();
-            let b_done = poll_once(b.as_mut(), Waker::noop()).is_ready();
-            if a_done && b_done {
-                break;
-            }
-            assert!(rounds < 100, "join did not converge");
-        }
-
-        (
-            a.as_mut().take_output().expect("a completed"),
-            b.as_mut().take_output().expect("b completed"),
-            rounds,
-        )
-    }
-
-    #[test]
-    fn joins_two_futures_concurrently() {
-        // Three polls and five polls respectively. Run concurrently the join takes
-        // max(3, 5) + 1 rounds, not the 9 that awaiting them in sequence would need.
-        let (a, b, rounds) = join2(CountDown::new(3), CountDown::new(5));
-        assert_eq!((a, b), (3, 5));
-        assert_eq!(rounds, 6);
-    }
-
-    #[test]
-    fn join_handles_branches_with_different_output_types() {
-        let (a, b, _) = join2(ready("left"), CountDown::new(2));
-        assert_eq!(a, "left");
-        assert_eq!(b, 2);
     }
 
     #[test]
