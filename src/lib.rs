@@ -50,6 +50,7 @@
 //! - [`composition::race`] - Return the first of two futures to complete
 //! - [`composition::join`] - Wait for two futures and collect both outputs
 //! - [`composition::try_join`] - The same, but stop at the first error
+//! - [`composition::fuse`] - Make polling after completion harmless
 //!
 //! Composition is key to building complex async operations from simple pieces.
 //! These patterns introduce pin projection and coordinating multiple futures.
@@ -120,39 +121,21 @@
 //! - `Fuse`, from the `futures` crate, returns `Pending` from then on, so a finished
 //!   branch quietly drops out of a `select!` loop instead of blowing it up.
 //!
-//! To get the guarantee from an arbitrary future rather than choosing it per type,
-//! there are two tools, and which one you want depends on what a finished future
-//! should report and whether its output needs keeping:
+//! Two of these are worth reaching for deliberately, and which you want depends on
+//! *when the output should be delivered relative to completion*.
+//! [`state_machine::maybe_done`] decouples "it has finished" from "give me the value";
+//! [`composition::fuse`] fuses the two into a single event.
 //!
-//! - [`state_machine::maybe_done`] answers `Ready(())`, meaning "I am finished", and
-//!   parks the output for collection later. That is what a join needs: it must know
-//!   every branch is done before it can build the result.
-//! - `Fuse`, from the `futures` crate, hands the output straight out on the poll where
-//!   the inner future completes, keeping nothing, and answers `Pending` on every poll
-//!   after that. So the output is delivered once, at completion, and never again. That
-//!   is what a select loop needs: a finished branch stops being chosen.
+//! |             | the completing poll                        | every poll after that          |
+//! |-------------|--------------------------------------------|--------------------------------|
+//! | `MaybeDone` | `Ready(())`; output withheld and parked    | `Ready(())`; inner untouched   |
+//! | `Fuse`      | `Ready(output)`; output out, inner dropped | `Pending`; no waker registered |
 //!
-//! Note that `Fuse`'s later `Pending` registers no waker, so awaiting a finished
-//! `Fuse` on its own hangs exactly like [`basic::pending`]. It is safe inside a
-//! `select!` only because the other branches get the task woken, which makes `Fuse` a
-//! select-loop component rather than a general "safe to poll again" wrapper.
+//! Neither generalises the other, and each module explains why.
 //!
-//! The difference is really about *when the output is delivered relative to
-//! completion*: `MaybeDone` decouples "it has finished" from "give me the value",
-//! while `Fuse` fuses the two into a single event.
-//!
-//! |                 | the completing poll                          | every poll after that            |
-//! |-----------------|----------------------------------------------|----------------------------------|
-//! | `MaybeDone`     | `Ready(())`; output withheld and parked      | `Ready(())`; inner untouched     |
-//! | `Fuse`          | `Ready(output)`; output out, inner dropped   | `Pending`; no waker registered   |
-//!
-//! Neither generalises the other. A join cannot be built on `Fuse`, because there is
-//! nowhere to park an output while a slower branch runs; a select loop built on
-//! `MaybeDone` would spin on branches answering `Ready(())`.
-//!
-//! `futures` also pairs `Fuse` with a `FusedFuture::is_terminated` method, so a
-//! well-behaved `select!` can skip finished branches rather than poll them and rely on
-//! the `Pending`. The graceful `Pending` is the safety net, not the mechanism.
+//! Finally, a type can advertise its choice generically through
+//! [`fused::FusedFuture`], which is what lets a caller that does not know the concrete
+//! type decide whether polling is worthwhile.
 //!
 //! ## Wakers
 //!
@@ -244,7 +227,9 @@
 //! 9. See [`composition::join`] for the other way to coordinate two futures, and
 //!    the payoff that justifies [`state_machine::maybe_done`]; then
 //!    [`composition::try_join`], where failing early means abandoning a branch
-//! 10. Finish with [`time::timeout`] to see everything combined
+//! 10. Read [`composition::fuse`] and [`fused`] for how a type can promise more than
+//!     the `Future` contract requires
+//! 11. Finish with [`time::timeout`] to see everything combined
 //!
 //! # References
 //!
@@ -258,6 +243,7 @@
 
 pub mod basic;
 pub mod composition;
+pub mod fused;
 pub mod state_machine;
 pub mod testing;
 pub mod time;

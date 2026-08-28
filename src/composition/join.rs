@@ -20,6 +20,20 @@
 //! the meantime, and hands it over via `take_output`. Those three states map one to
 //! one onto the three problems above.
 //!
+//! # Why polling a finished branch is allowed here
+//!
+//! `Join` polls both branches every round, including ones that have already finished,
+//! which looks like the thing `Future`'s docs warn against. It is not: the branches
+//! are [`MaybeDone`](crate::state_machine::maybe_done), and that type documents a poll
+//! in its `Done` state as a harmless `Ready(())`. The base contract is a floor, and a
+//! concrete type may promise more; see [`fused`](crate::fused).
+//!
+//! A `select!` loop cannot do this, because it is generic over branches whose
+//! behaviour after completion is unspecified, so it asks
+//! [`FusedFuture::is_terminated`](crate::fused::FusedFuture::is_terminated) first.
+//! `Join` needs no such question, and neither `futures` nor `tokio` asks it in their
+//! own join implementations.
+//!
 //! # The short-circuit trap
 //!
 //! Both branches must be polled every round. It is easy to write this instead:

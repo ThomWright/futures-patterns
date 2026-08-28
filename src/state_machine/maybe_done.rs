@@ -21,6 +21,15 @@
 //!        --take_output()--------> None
 //! ```
 //!
+//! # `is_terminated` is deliberately blunt
+//!
+//! [`FusedFuture::is_terminated`] reports
+//! `true` for both `Done` and `Gone`, even though polling those differs sharply:
+//! `Done` absorbs the poll harmlessly, while `Gone` panics. It answers "should you
+//! poll this?", not "what happens if you do", and for both the answer is no.
+//!
+//! [`FusedFuture::is_terminated`]: crate::fused::FusedFuture::is_terminated
+//!
 //! # Why three states?
 //!
 //! The `Gone` state exists to handle the case where someone calls `take_output()`
@@ -61,6 +70,7 @@
 //! # }
 //! ```
 
+use crate::fused::FusedFuture;
 use std::future::Future;
 use std::mem;
 use std::pin::Pin;
@@ -207,6 +217,15 @@ impl<Fut: Future> MaybeDone<Fut> {
     }
 }
 
+impl<Fut: Future> FusedFuture for MaybeDone<Fut> {
+    fn is_terminated(&self) -> bool {
+        match self {
+            MaybeDone::Future(_) => false,
+            MaybeDone::Done(_) | MaybeDone::Gone => true,
+        }
+    }
+}
+
 impl<Fut: Future> Future for MaybeDone<Fut> {
     type Output = ();
 
@@ -310,6 +329,20 @@ mod tests {
     fn output_mut_is_none_unless_done() {
         let mut fut = Box::pin(maybe_done(CountDown::new(3)));
         assert!(fut.as_mut().output_mut().is_none());
+    }
+
+    #[test]
+    fn is_terminated_covers_both_finished_states() {
+        use crate::fused::FusedFuture;
+
+        let mut fut = Box::pin(maybe_done(ready(42)));
+        assert!(!fut.is_terminated(), "still running");
+
+        assert_eq!(poll_once(fut.as_mut(), Waker::noop()), Poll::Ready(()));
+        assert!(fut.is_terminated(), "Done: safe to poll, but pointless");
+
+        assert_eq!(fut.as_mut().take_output(), Some(42));
+        assert!(fut.is_terminated(), "Gone: polling would now panic");
     }
 
     #[test]

@@ -9,6 +9,7 @@
 //! [`try_join`] adds failure to that: it returns the first error without waiting for
 //! the other branch, which means abandoning it mid-flight.
 
+pub mod fuse;
 pub mod join;
 pub mod try_join;
 pub mod map;
