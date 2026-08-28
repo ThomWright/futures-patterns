@@ -26,6 +26,11 @@
 //! `Done` absorbs the poll harmlessly, while `Gone` panics. It answers "should you
 //! poll this?", not "what happens if you do", and for both the answer is no.
 //!
+//! The trait is written to allow this. `futures-core` says `is_terminated` may also
+//! return `true` where a future "has become inactive and can no longer make progress
+//! and should be ignored or dropped rather than being `poll`ed again", which describes
+//! `Gone` exactly.
+//!
 //! [`FusedFuture::is_terminated`]: crate::fused::FusedFuture::is_terminated
 //!
 //! # Why three states?

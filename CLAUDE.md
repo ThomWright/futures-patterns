@@ -36,9 +36,9 @@ Applies to doc comments, README and commit messages alike.
 - Sentence case for headings.
 - Never hard-wrap Markdown. `markdownlint` is configured with MD013 off so it agrees.
 
-## Documenting a pattern
+## Documenting a module
 
-Each module should answer, roughly in this order:
+Every module, not only the pattern ones, should answer these in roughly this order. Lead with what the thing *is*; the teaching comes after it, not instead of it.
 
 - What it does, in a sentence.
 - Why it is shaped the way it is — the failure that each design decision prevents. This is the part worth the words.
