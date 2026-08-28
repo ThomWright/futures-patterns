@@ -116,9 +116,15 @@
 //! - [`state_machine::maybe_done`] answers `Ready(())`, meaning "I am finished", and
 //!   parks the output for collection later. That is what a join needs: it must know
 //!   every branch is done before it can build the result.
-//! - `Fuse`, from the `futures` crate, answers `Pending` forever and passes the output
-//!   straight through on the completing poll, keeping nothing. That is what a select
-//!   loop needs: a finished branch should simply stop being chosen.
+//! - `Fuse`, from the `futures` crate, hands the output straight out on the poll where
+//!   the inner future completes, keeping nothing, and answers `Pending` on every poll
+//!   after that. So the output is delivered once, at completion, and never again. That
+//!   is what a select loop needs: a finished branch stops being chosen.
+//!
+//! Note that `Fuse`'s later `Pending` registers no waker, so awaiting a finished
+//! `Fuse` on its own hangs exactly like [`basic::pending`]. It is safe inside a
+//! `select!` only because the other branches get the task woken, which makes `Fuse` a
+//! select-loop component rather than a general "safe to poll again" wrapper.
 //!
 //! Neither generalises the other. A join cannot be built on `Fuse`, because there is
 //! nowhere to park an output while a slower branch runs; a select loop built on
