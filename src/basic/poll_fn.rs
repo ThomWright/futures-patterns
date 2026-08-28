@@ -10,7 +10,7 @@
 //! annotation to the future it owns, which is unsound.
 //!
 //! The derived impl already gives what is needed -- `PollFn<F>` is `Unpin` exactly
-//! when `F` is -- so the fix is to write no `Unpin` impl by hand at all.
+//! when `F` is -- so the fix is to add no `Unpin` impl of our own.
 //!
 //! See: <https://internals.rust-lang.org/t/surprising-soundness-trouble-around-pollfn/17484>
 //!

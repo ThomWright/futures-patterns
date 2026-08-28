@@ -5,7 +5,7 @@
 //! at all: a future that parks, and is woken later by *something else* -- another
 //! thread, an I/O event, a timer firing.
 //!
-//! That is what a leaf future does, and [`shared_state`] builds one by hand.
+//! That is what a leaf future does, and [`shared_state`] builds one.
 //!
 //! # Why this matters beyond `Future`
 //!
