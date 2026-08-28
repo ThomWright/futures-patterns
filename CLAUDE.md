@@ -6,7 +6,7 @@ Learning the parts of Rust async that are hard, by implementing them by hand. It
 
 Scope is async traits generally, not only `Future`: `Stream::poll_next` and tower's `Service::poll_ready` belong here too.
 
-There may be a local, gitignored `reference/` directory holding checkouts of tokio, tower and linkerd2-proxy. It is not part of this repo and exists on one machine. Read it to check claims; never cite it, link into it, or assume anyone else has it.
+A gitignored `reference/` directory may exist locally, holding source worth reading. Look at what is actually in it rather than assuming. It is not part of this repo, so never cite it, link into it, or assume a reader has it.
 
 ## Prose
 
@@ -62,5 +62,5 @@ All four must be clean:
 cargo test
 cargo clippy --all-targets
 cargo doc --no-deps
-markdownlint README.md
+markdownlint *.md
 ```
