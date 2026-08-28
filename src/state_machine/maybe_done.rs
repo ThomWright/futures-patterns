@@ -1,8 +1,6 @@
 //! A future that may have completed.
 //!
-//! This is a fundamental state machine pattern that wraps another future and
-//! tracks whether it has completed. It uses an enum with three states to manage
-//! the lifecycle:
+//! Wraps another future and tracks whether it has finished, using three states:
 //!
 //! - `Future(Fut)` - The wrapped future hasn't completed yet.
 //! - `Done(Fut::Output)` - The future completed, and we're storing its output.

@@ -1,32 +1,24 @@
 //! Wrapping an existing future in a newtype.
 //!
-//! This pattern shows how to wrap an existing future to:
-//! - Hide implementation details
-//! - Provide a cleaner, more semantic API
-//! - Avoid exposing complex nested future types
-//! - Create domain-specific future types
+//! A newtype hides the concrete type of the future underneath, so an API can hand back
+//! a `ShutdownSignal` rather than whatever stack of combinators produced it.
 //!
 //! # The challenge
 //!
-//! When you have a future (like `Notified` from tokio::sync::Notify or
-//! `Receiver` from a channel) and want to wrap it in a custom type, you need to:
-//!
-//! 1. Store the inner future
-//! 2. Implement Future for your wrapper
-//! 3. Handle pinning correctly
-//! 4. Forward the poll to the inner future
-//!
-//! The tricky part is pinning - when your wrapper is pinned, you need to project
-//! that pin to the inner future safely.
+//! Storing a future -- `Notified` from `tokio::sync::Notify`, say, or a channel
+//! `Receiver` -- and forwarding `poll` to it is straightforward. Pinning is not. When
+//! the wrapper is pinned the inner future must be pinned too, and getting a
+//! `Pin<&mut Inner>` out of a `Pin<&mut Self>` is what pin projection means.
 //!
 //! # Key methods for working with pinned types
 //!
-//! When working with `Option<Future>` or similar wrapper types, these methods are crucial:
+//! These are the ones that come up:
 //!
 //! - `Option::as_pin_mut()` - Converts `Pin<&mut Option<T>>` to `Option<Pin<&mut T>>`.
 //! - `Pin::as_mut()` - Converts `&mut Pin<Pointer<T>>` to `Pin<&mut T>` (reborrowing).
 //! - `Pin::new()` - Creates `Pin<&mut T>` when `T: Unpin`.
-//! - `self.project()` (from pin-project) - Projects pinned struct to pinned fields.
+//! - `self.project()` (from `pin-project-lite`) - Projects a pinned struct to its
+//!   pinned fields.
 //!
 //! # Two approaches
 //!
@@ -82,11 +74,8 @@
 //!
 //! # When to use
 //!
-//! Use this pattern when:
-//! - You want to hide complex future types from your API
-//! - You need domain-specific future types (e.g., `ShutdownSignal`, `TaskComplete`)
-//! - You're building a library and want to avoid exposing implementation details
-//! - You need to add semantic meaning to a generic future
+//! When the type of the future you return is an implementation detail, and naming it
+//! in your signature would tie you to it.
 //!
 //! # Examples
 //!

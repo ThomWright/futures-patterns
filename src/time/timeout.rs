@@ -1,18 +1,9 @@
 //! Require a future to complete within a time limit.
 //!
-//! The `Timeout` pattern races a future against a timer. If the future completes
-//! first, its value is returned as `Ok`. If the timer expires first, an `Err`
-//! is returned. This is a practical application of the race pattern with tokio's
-//! timer infrastructure.
-//!
-//! # Pattern overview
-//!
-//! Timeout demonstrates:
-//! - Racing futures with different output types
-//! - Integrating with tokio's timer system (Sleep)
-//! - Result transformation (wrapping success/timeout cases)
-//! - Cooperative scheduling considerations
-//! - How polling order affects behaviour
+//! `Timeout` races a future against a timer. If the future finishes first its value
+//! comes back as `Ok`; if the timer fires first, the result is `Err`. It is the
+//! [`race`](crate::composition::race) pattern applied to a real runtime service, and
+//! the first pattern here that needs a runtime at all.
 //!
 //! # Polling strategy
 //!
