@@ -21,7 +21,7 @@
 //! A branch that completes has to be *inspected* before the join knows what to do:
 //!
 //! - if it produced an error, take it and return
-//! - if it produced a value, leave the value parked for the final harvest
+//! - if it produced a value, leave the value where it is for the final harvest
 //!
 //! That is a peek, not a move, which is what
 //! [`MaybeDone::output_mut`](crate::state_machine::maybe_done::MaybeDone::output_mut)
@@ -84,7 +84,7 @@ where
     }
 }
 
-/// Returns the branch's error if it has completed with one, leaving an `Ok` parked.
+/// Returns the branch's error if it has completed with one, leaving an `Ok` untouched.
 ///
 /// The peek through `output_mut` matters: taking the output unconditionally would
 /// move an `Ok` value out with nowhere to put it until the other branch lands.
@@ -128,7 +128,7 @@ where
             return Poll::Pending;
         }
 
-        // Both succeeded, so both values are parked and can be collected.
+        // Both succeeded, so both values are stored and can be collected.
         let (Some(Ok(a)), Some(Ok(b))) = (this.a.take_output(), this.b.take_output()) else {
             unreachable!("both branches completed successfully")
         };

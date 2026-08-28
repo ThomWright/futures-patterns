@@ -35,12 +35,12 @@
 //!
 //! Both make polling after completion safe, for opposite consumers.
 //! [`MaybeDone`](crate::state_machine::maybe_done) withholds the output at completion
-//! and parks it for `take_output`, so a join can learn every branch is done before
+//! and keeps it for `take_output`, so a join can learn every branch is done before
 //! collecting anything. `Fuse` hands the output over at completion and keeps nothing,
 //! so a select loop gets the value the moment it appears and the branch then falls
 //! silent.
 //!
-//! Neither generalises the other: a join cannot park outputs in a `Fuse`, and a select
+//! Neither generalises the other: a join cannot store outputs in a `Fuse`, and a select
 //! loop over `MaybeDone` would spin on branches answering `Ready(())`.
 //!
 //! # Relationship to `OptionFuture`

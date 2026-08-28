@@ -48,15 +48,15 @@ Recommended order for understanding the patterns:
 
 1. `basic::ready` and `basic::pending` - always ready, and never ready.
 2. `basic::poll_fn` - a future from a closure. The first place pinning forces `unsafe`.
-3. `basic::wrapper` - wrapping another future, and projecting pinnedness onto it.
+3. `basic::wrapper` - wrapping another future, and pin projection.
 4. `state_machine::two_state` - states written out by hand, and waking yourself.
-5. `waking::shared_state` - where readiness comes from: parked until another thread wakes you.
-6. `state_machine::maybe_done` - parking a finished future's output.
-7. `composition::map` - transforming an output. Why the function lives in an `Option`.
-8. `composition::race` - first of two wins, and the bias that creates.
+5. `waking::shared_state` - a future that waits until another thread wakes it. Where readiness comes from.
+6. `state_machine::maybe_done` - keeping a finished future's output while the others catch up.
+7. `composition::map` - transforming another future's output.
+8. `composition::race` - whichever of two finishes first, and why the polling order matters.
 9. `composition::join` and `composition::try_join` - waiting for both. Failing early means abandoning a branch.
 10. `composition::fuse` and `fused` - promising more than the `Future` contract requires.
-11. `time::timeout` - racing a runtime timer, and where this stops matching tokio.
+11. `time::timeout` - racing against the runtime's timer. The first pattern that needs a runtime.
 
 `testing` is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
 

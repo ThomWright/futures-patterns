@@ -11,7 +11,7 @@
 //!
 //! 1. A branch that has already finished must not be polled again, but the loop still
 //!    has to poll *something* for it each round.
-//! 2. Its output has to be parked somewhere, because the result tuple cannot be
+//! 2. Its output has to be kept somewhere, because the result tuple cannot be
 //!    returned until the slowest branch lands.
 //! 3. All the outputs have to be harvested at the end, in one go.
 //!
@@ -85,7 +85,7 @@ pin_project! {
         B: Future,
     {
         // Each branch is wrapped so that a completed one can be polled harmlessly
-        // and its output parked until the other finishes.
+        // and its output kept until the other finishes.
         #[pin]
         a: MaybeDone<A>,
         #[pin]
