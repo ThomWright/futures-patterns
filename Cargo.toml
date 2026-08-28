@@ -3,7 +3,7 @@ name = "futures-patterns"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-description = "Patterns for implementing Futures in Rust, written out by hand"
+description = "Common Future patterns, reimplemented and explained"
 repository = "https://github.com/ThomWright/futures-patterns"
 
 # Not a crates.io crate; it exists to be read, not depended on.

@@ -2,7 +2,7 @@
 
 ## What this crate is for
 
-Learning the parts of Rust async that are hard, by implementing them by hand. It is not a library anyone depends on, so **educational clarity beats every other consideration** — including neat testability. If a clearer pattern is harder to test, take the clearer pattern and say what the tests do not cover.
+Learning the parts of Rust async that are hard, by implementing them. It is not a library anyone depends on, so **educational clarity beats every other consideration** — including neat testability. If a clearer pattern is harder to test, take the clearer pattern and say what the tests do not cover.
 
 Scope is async traits generally, not only `Future`: `Stream::poll_next` and tower's `Service::poll_ready` belong here too.
 
