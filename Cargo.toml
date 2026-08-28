@@ -2,6 +2,11 @@
 name = "futures-patterns"
 version = "0.1.0"
 edition = "2024"
+
+# Let chains, used in composition::fuse's tests, were stabilised for the 2024
+# edition in 1.88. Without this field, an older toolchain reports the unstable
+# syntax rather than saying the compiler is too old.
+rust-version = "1.88"
 license = "MIT"
 description = "Async patterns built on poll, Pin and Waker, explained"
 repository = "https://github.com/ThomWright/futures-patterns"
