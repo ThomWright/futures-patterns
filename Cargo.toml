@@ -2,6 +2,7 @@
 name = "futures-patterns"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 
 [dependencies]
 tokio = { version = "1", features = ["time", "macros", "rt", "rt-multi-thread", "sync"] }

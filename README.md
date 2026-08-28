@@ -73,3 +73,13 @@ Based on implementations from:
 - [tokio](https://github.com/tokio-rs/tokio)
 - [tower](https://github.com/tower-rs/tower)
 - [linkerd-proxy](https://github.com/linkerd/linkerd2-proxy)
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+Several patterns follow production implementations closely enough to count as derived work, and those carry their own MIT notices:
+
+- [tokio](https://github.com/tokio-rs/tokio), Copyright (c) 2023 Tokio Contributors — `basic::poll_fn` and `time::timeout`.
+- [futures-rs](https://github.com/rust-lang/futures-rs), Copyright (c) 2016 Alex Crichton and Copyright (c) 2017 The Tokio Authors — `state_machine::maybe_done`, `composition::fuse`, `composition::map`, `composition::join` and the `fused::FusedFuture` trait.
+- The Rust standard library — `basic::ready` and `basic::pending` mirror `std::future::{ready, pending}`.
