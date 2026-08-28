@@ -1,30 +1,25 @@
 //! Transform a future's output with a function.
 //!
-//! The `Map` combinator wraps a future and applies a function to its output
-//! when it completes. This is one of the fundamental composition patterns that
-//! allows building complex async operations from simpler ones.
+//! `Map` wraps a future and applies a function to its output when it completes. It is
+//! the smallest combinator here: one inner future, one transformation, no coordination.
 //!
-//! # Pattern overview
+//! # Why the function lives in an `Option`
 //!
-//! Map demonstrates:
-//! - How to wrap and poll an inner future
-//! - How to transform the output type
-//! - Basic use of `pin-project-lite` for safe pin projection
-//! - How combinators compose futures
+//! The function is `FnOnce`, so calling it consumes it, and calling it requires moving
+//! it out of the struct. `Option::take` is what allows that from behind a `&mut`.
 //!
-//! # Pinning strategy
+//! The empty `Option` doubles as a record that the work is done, which is how a second
+//! poll is caught and turned into a panic rather than a silent wrong answer.
 //!
-//! This uses `pin-project-lite` to safely project the pin from `Map` to the
-//! inner future. The `#[pin]` attribute ensures that when `Map` is pinned,
-//! the inner future is also properly pinned.
+//! # Pinning
+//!
+//! `pin-project-lite` projects the pin from `Map` to the inner future, which the
+//! `#[pin]` attribute on that field asks for. The function needs no such treatment: it
+//! is called, never polled.
 //!
 //! # When to use
 //!
-//! Use this pattern when you need to:
-//! - Transform a future's output type
-//! - Apply post-processing to async results
-//! - Build combinator libraries
-//! - Chain operations on futures
+//! When you have a future whose output is the wrong shape.
 //!
 //! # Example
 //!

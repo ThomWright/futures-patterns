@@ -1,32 +1,24 @@
 //! Race two futures, returning the first to complete.
 //!
-//! The `Race` pattern polls two futures concurrently and returns the output of
-//! whichever completes first. This is a fundamental pattern for implementing
-//! timeouts, cancellation, and alternative execution paths.
-//!
-//! # Pattern overview
-//!
-//! Race demonstrates:
-//! - Polling multiple futures in a single poll call
-//! - Using enums to represent which future won
-//! - Pin projection with multiple pinned fields
-//! - How to coordinate independent async operations
+//! `Race` drives two futures at once and yields whichever finishes first, wrapped in
+//! [`Either`] so the caller can tell which one it was.
 //!
 //! # Polling order
 //!
-//! This implementation polls `left` first, then `right`. If `left` is ready,
-//! we return immediately without polling `right`. This means:
-//! - If both futures are ready, `left` wins.
-//! - This can be useful for prioritisation.
-//! - Timeout patterns typically rely on this behaviour.
+//! `left` is polled first, and if it is ready `right` is not polled at all. So:
+//!
+//! - If both are ready, `left` wins, which is a way to express a priority.
+//! - A `left` that is ready on every poll starves `right` completely. Tokio's `select!`
+//!   rotates its branch order to avoid this; `Race` does not.
+//! - [`timeout`](crate::time::timeout) depends on the order, polling the operation
+//!   before the timer so a fast operation never reports a spurious timeout.
 //!
 //! # When to use
 //!
 //! Use this pattern for:
-//! - Implementing timeouts (race with a timer)
-//! - Providing alternative paths (try A, fall back to B)
-//! - Implementing cancellation (race with a cancel signal)
-//! - Building select/choice operations
+//! - Timeouts, racing the operation against a timer
+//! - Fallbacks, trying A and taking B if it answers first
+//! - Cancellation, racing against a signal that means stop
 //!
 //! # Example
 //!

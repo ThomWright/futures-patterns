@@ -1,8 +1,7 @@
-//! A simple two-state future for learning state machine patterns.
+//! A future that is pending for a fixed number of polls.
 //!
-//! This is a custom example (not from tokio) that demonstrates building a
-//! state machine from scratch. It's simpler than MaybeDone and helps understand
-//! the fundamental concepts before moving to more complex patterns.
+//! Invented for this crate rather than taken from tokio, so the state machine stays
+//! small enough to read in one go.
 //!
 //! # State machine
 //!
@@ -19,13 +18,11 @@
 //! the original count, which is no longer recoverable once `remaining` has been
 //! decremented.
 //!
-//! # When to use
+//! # What it shows
 //!
-//! This pattern demonstrates:
-//! - How to design a custom state machine
-//! - How state transitions work in practice
-//! - How to store data needed for state transitions
-//! - The basics before moving to more complex patterns
+//! - Writing the states out as an enum, and moving between them inside `poll`
+//! - Carrying the data a later state will need
+//! - Asking to be polled again, rather than being woken from outside
 //!
 //! # Example
 //!

@@ -1,31 +1,25 @@
 //! A future that wraps a polling function.
 //!
-//! This pattern allows creating a future from a closure that implements the polling
-//! logic directly. It's the most flexible basic pattern and demonstrates important
-//! concepts around pinning and the `Unpin` trait.
+//! Builds a future from a closure that implements `poll` directly, which is the
+//! quickest way to get custom polling behaviour without declaring a type for it.
 //!
-//! # Why this struct is intentionally !Unpin
+//! # Why `PollFn` is `Unpin` only when its closure is
 //!
-//! This is a crucial learning point from tokio's implementation. When a closure `F`
-//! is `!Unpin`, we need `PollFn<F>` to also be `!Unpin`. Here's why:
+//! If `PollFn` were unconditionally `Unpin`, the compiler would add `noalias` to
+//! mutable references to it. A closure that owns a future would then leak that
+//! annotation to the future it owns, which is unsound.
 //!
-//! If `PollFn` were unconditionally `Unpin`, Rust's compiler would add `noalias`
-//! annotations to mutable references to `PollFn`. This is a problem because if the
-//! closure owns a future, that "leaks" the noalias annotation to the owned future,
-//! which can cause soundness issues.
-//!
-//! By making `PollFn` conditionally `Unpin` (only when `F` is `Unpin`), we avoid
-//! this problem.
+//! The derived impl already gives what is needed -- `PollFn<F>` is `Unpin` exactly
+//! when `F` is -- so the fix is to write no `Unpin` impl by hand at all.
 //!
 //! See: <https://internals.rust-lang.org/t/surprising-soundness-trouble-around-pollfn/17484>
 //!
 //! # When to use
 //!
 //! Use this pattern when:
-//! - You need custom polling logic without defining a new type
-//! - You're prototyping async behaviour
-//! - You need to integrate with non-standard async sources
-//! - You want to manually control when a future becomes ready
+//! - You need custom polling logic without declaring a type for it
+//! - You are adapting something that is not already a future
+//! - You want to control exactly when the future becomes ready
 //!
 //! # Example
 //!

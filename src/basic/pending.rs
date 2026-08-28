@@ -1,17 +1,15 @@
 //! A future that never completes.
 //!
-//! This future always returns `Poll::Pending` and never resolves to a value.
-//! It demonstrates the minimal implementation of a perpetually-pending future.
+//! Zero-sized and stateless: every poll returns `Poll::Pending`.
 //!
 //! # When to use
 //!
 //! This pattern is useful for:
 //! - Testing timeout behaviour
-//! - Creating placeholder futures during development
-//! - Demonstrating async control flow
-//! - Race conditions where one branch should never complete
+//! - Standing in for a future that does not exist yet
+//! - A branch of `race` that must never win
 //!
-//! # Important note on Wakers
+//! # Why this never wakes
 //!
 //! This implementation never calls `cx.waker().wake()`, so the runtime will not poll
 //! it again, and the task parks forever. That is the *correct* behaviour here, not a

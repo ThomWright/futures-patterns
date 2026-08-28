@@ -1,14 +1,13 @@
 //! A future that immediately resolves to a value.
 //!
-//! This is the simplest possible Future implementation - it always returns
-//! `Poll::Ready` on the first poll. It requires no state tracking and demonstrates
-//! the most basic structure of the Future trait.
+//! Ready on the first poll, handing over a value supplied when it was created.
+//!
+//! The value is kept in an `Option` and moved out on that poll, so `Ready` does carry
+//! state, and polling it again panics: there is nothing left to hand over.
 //!
 //! # When to use
 //!
-//! Use this pattern when you need to wrap a value in a Future but the value
-//! is already available. Common in APIs that require Future return types but
-//! sometimes have the result immediately available.
+//! When an API requires a future but the value is already to hand.
 //!
 //! # Example
 //!
