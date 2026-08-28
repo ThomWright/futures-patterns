@@ -3,6 +3,11 @@ name = "futures-patterns"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
+description = "Patterns for implementing Futures in Rust, written out by hand"
+repository = "https://github.com/ThomWright/futures-patterns"
+
+# Not a crates.io crate; it exists to be read, not depended on.
+publish = false
 
 [dependencies]
 tokio = { version = "1", features = ["time", "macros", "rt", "rt-multi-thread", "sync"] }
