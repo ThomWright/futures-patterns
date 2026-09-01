@@ -30,7 +30,7 @@ Applies to doc comments, README and commit messages alike.
 ### Lists
 
 - Every item must earn its place. Four bullets saying "hide the concrete type" four ways is one bullet.
-- Punctuate consistently *within* a list, and let the items decide. The test is whether an item continues the lead-in: "the patterns show how to: / Use enums…" continues it and takes no full stop, while "[`basic::ready`] - A future that immediately returns a value." is a labelled entry and does.
+- Punctuate consistently *within* a list. Each item is either a fragment completing the lead-in's sentence, or a complete sentence on its own; fragments take no full stop, complete sentences do. "the patterns show how to: / Use enums…" is a fragment finishing the lead-in and takes none, while "[`basic::ready`] - A future that immediately returns a value." is a complete sentence in its own right — the label stands in as its subject — and takes one.
 
 ### Mechanics
 
@@ -39,6 +39,8 @@ Applies to doc comments, README and commit messages alike.
 - Never hard-wrap Markdown. `markdownlint` is configured with MD013 off so it agrees.
 
 ## Documenting a module
+
+See `PEDAGOGY.md` for how a module's place in the learning path constrains what it may assume and how it should explain what it can't yet.
 
 Every module, not only the pattern ones, should answer these in roughly this order. Lead with what the thing *is*; the teaching comes after it, not instead of it.
 
