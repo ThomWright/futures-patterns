@@ -10,6 +10,15 @@ Scope is async traits generally, not only `Future`: `Stream::poll_next` and towe
 
 A gitignored `reference/` directory may exist locally, holding source worth reading. Look at what is actually in it rather than assuming. It is not part of this repo, so never cite it, link into it, or assume a reader has it.
 
+Every module is one of two things, or both:
+
+- **A pattern**: a shape of code worth writing for its own sake, that a reader could reasonably reach for in their own project.
+- **A mechanism study**: a reimplementation of something a real API already provides, done to make an otherwise-hidden mechanic (`Pin`, a waker, the poll contract) visible. Nobody is meant to copy it in place of the real thing.
+
+The test: would someone realistically hand-write this themselves, given that an off-the-shelf equivalent exists? If the real version is simply the thing to call, and there's no variation left to write, it's a mechanism study — the module's value is in the exhibit, not the code. If there's no real equivalent, or people genuinely write bespoke versions in real code, it's a pattern.
+
+A module can be both. Keep the two apart rather than presenting them as one thing — lead with the pattern, mark the mechanism study as a separate, later layer.
+
 ## Prose
 
 Applies to doc comments, README and commit messages alike.
