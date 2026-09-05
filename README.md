@@ -5,78 +5,98 @@
 
 Async patterns built on `poll`, `Pin` and `Waker`, explained.
 
-`async fn` is simpler, more ergonomic, and the right default. But some things cannot be written that way: a future you need to name, so it can sit in a struct field or have traits implemented on it; a leaf future woken by something outside the async world; a combinator driving several futures at once; or a type whose behaviour after completion is part of its contract.
+`async fn` is a higher level interface for writing async code. But some things cannot be written that way: a future you need to name, so it can sit in a struct field or have traits implemented on it; a leaf future woken by something outside the async world; a combinator driving several futures at once; or a type whose behaviour after completion is part of its contract.
 
-Doing it by hand means upholding contracts the compiler does not check, and which of them bites depends on what you are building. Wrapping or storing a future runs into `Pin`, where `Pin<&mut Self>` is not `&mut Self` and reaching a field becomes a choice between projection, reborrowing and an `unsafe` escape hatch; and into lifetimes, once it borrows. Writing one woken from outside runs into the waker rules, where returning `Pending` is a promise to arrange a wake, and forgetting it gives you a task that hangs rather than a program that fails to compile. Writing a combinator runs into the poll contract, and what you are allowed to do to a future that has already finished.
+Doing it by hand sometimes means satisfying compiler-enforced invariants which are difficult to meet, or upholding contracts the compiler does *not* check.
 
-Every pattern here exists to explain one of those.
+This library contains a set of examples to illustrate lower level async concepts, and show how to write code which satisfies both the compiler and those other invariants.
 
-Some follow a production implementation closely and say which. Others are invented to isolate a single idea. Either way each is documented with the concepts it depends on, the trade-offs it makes, and what it simplifies.
+## Organisation
 
-## Patterns implemented
+The examples are organised by complexity:
 
 ### Basic patterns
 
-- **Ready** - A future that immediately returns a value.
-- **Pending** - A future that never completes.
-- **YieldNow** - A future that gives up the thread once.
-- **Wrapper** - Wrap an existing future in a newtype to hide or rename it.
+Start here to understand the fundamentals of the Future trait:
+
+- [`basic::ready`] - A future that immediately returns a value.
+- [`basic::pending`] - A future that never completes.
+- [`basic::yield_now`] - A future that gives up the thread once.
+- [`basic::wrapper`] - Wrap an existing future in a newtype.
+
+These demonstrate the basic structure of futures and introduce concepts like polling, wakers, and pinning.
 
 ### State machine patterns
 
-- **MaybeDone** - Track whether a future has completed.
-- **TwoState** - Simple countdown state machine.
+Learn how to build futures with internal state transitions:
+
+- [`state_machine::maybe_done`] - Track whether a future has completed.
+- [`state_machine::two_state`] - Simple countdown state machine.
+
+State machines are fundamental to implementing complex async behaviour. These examples show how to use enums to represent different states and manage transitions during polling.
 
 ### Waking
 
-- **shared_state** - A future woken by another thread.
+Where readiness comes from in the first place:
 
-Every other pattern here completes immediately, wakes itself, or forwards a poll to a future underneath it. This one parks and is woken by something external, which is what leaf futures do and what everything else is built on.
+- [`waking::shared_state`] - A future woken by another thread.
+
+Every other example here completes immediately, wakes itself, or forwards a poll to a future underneath it. This one parks and is woken by something external, which is what leaf futures do and what the rest are ultimately built on.
 
 ### Composition patterns
 
-- **Map** - Transform a future's output.
-- **Race** - Return the first of two futures to complete.
-- **Join** - Wait for two futures and collect both outputs.
-- **TryJoin** - The same, but stop at the first error.
-- **Fuse** - Make polling after completion harmless.
+Build futures that drive other futures:
+
+- [`composition::map`] - Transform a future's output.
+- [`composition::race`] - Return the first of two futures to complete.
+- [`composition::join`] - Wait for two futures and collect both outputs.
+- [`composition::try_join`] - The same, but stop at the first error.
+- [`composition::fuse`] - Make polling after completion harmless.
+
+Composition is key to building complex async operations from simple pieces. These examples introduce pin projection and coordinating multiple futures.
 
 ### Time-based patterns
 
-- **Timeout** - Require a future to complete within a time limit.
+Work with time and deadlines using tokio's timer infrastructure:
+
+- [`time::timeout`] - Require a future to complete within a time limit.
+
+This demonstrates integration with runtime services and practical patterns for real-world async code.
 
 ### Advanced
 
-- **PollFn** - Wrap a closure into a future.
+Deeper explorations into more advanced topics:
+
+- [`advanced::poll_fn`] - Wrap a closure into a future.
 
 ### Testing
 
-- **testing** - Poll futures by hand, and count wakes.
+- [`testing`] - Poll futures by hand, and count wakes.
 
-`.await` only shows a future's final output. To test a `Future` implementation you need to see the poll sequence itself: how many polls it took, and whether the task was woken when it should have been. That is where the subtle bugs live.
+`.await` only reveals a future's final output. These helpers drive a future one poll at a time so tests can assert on the whole poll sequence -- how many polls it took, and whether the task was woken when it should have been. That is where the subtle bugs in a `Future` impl actually live.
 
 ## Learning path
 
-Recommended order for understanding the patterns:
+Recommended order for learning:
 
-1. `basic::ready` and `basic::pending` - always ready, and never ready.
-2. `basic::yield_now` - pending once, and arranging its own wake.
-3. `basic::wrapper` - wrapping another future, and pin projection.
-4. `state_machine::two_state` - states written out by hand, and asking to be polled again.
-5. `waking::shared_state` - a future that waits until another thread wakes it. Where readiness comes from.
-6. `state_machine::maybe_done` - keeping a finished future's output while the others catch up.
-7. `composition::map` - transforming another future's output.
-8. `composition::race` - whichever of two finishes first, and why the polling order matters.
-9. `composition::join` - waiting for both. Then `composition::try_join`, where failing early means abandoning a branch.
-10. `composition::fuse` - promising more than the `Future` contract requires, and `fused` for saying so.
-11. `time::timeout` - racing against the runtime's timer. The first pattern that needs a runtime.
-12. `advanced::poll_fn` - a future from a closure. The first place pinning forces `unsafe`.
+1. [`basic::ready`] and [`basic::pending`] - always ready, and never ready.
+2. [`basic::yield_now`] - pending once, and arranging its own wake.
+3. [`basic::wrapper`] - wrapping another future, and pin projection.
+4. [`state_machine::two_state`] - states written out by hand, and asking to be polled again.
+5. [`waking::shared_state`] - a future that waits until another thread wakes it. Where readiness comes from.
+6. [`state_machine::maybe_done`] - keeping a finished future's output while the others catch up.
+7. [`composition::map`] - transforming another future's output.
+8. [`composition::race`] - whichever of two finishes first, and why the polling order matters.
+9. [`composition::join`] - waiting for both. Then [`composition::try_join`], where failing early means abandoning a branch.
+10. [`composition::fuse`] - promising more than the `Future` contract requires, and [`fused`] for saying so.
+11. [`time::timeout`] - racing against the runtime's timer. The first example that needs a runtime.
+12. [`advanced::poll_fn`] - a future from a closure. The first place pinning forces `unsafe`.
 
-`testing` is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
+[`testing`] is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
 
 ## Documentation
 
-Run `cargo doc --open` to view the full documentation with detailed explanations of each pattern.
+Run `cargo doc --open` to view the full documentation, including the key concepts the examples share.
 
 Run `cargo test` to check them. Most of the explanation lives in doc comments, so the doctests are a substantial part of the suite; the poll-level tests that `.await` cannot express sit beside the code they cover, in each module's `mod tests`.
 
@@ -88,9 +108,10 @@ Worth reading alongside this. Where a module is derived from one of them rather 
 - [futures-rs](https://github.com/rust-lang/futures-rs)
 - [tower](https://github.com/tower-rs/tower)
 - [linkerd2-proxy](https://github.com/linkerd/linkerd2-proxy)
+- The Rust async book
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](./LICENSE).
 
 Some modules are derived from tokio, futures-rs and the Rust standard library, all used here under MIT. Their notices, and which file each follows, are in [NOTICE.md](NOTICE.md).
