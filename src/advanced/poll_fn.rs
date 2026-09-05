@@ -24,7 +24,7 @@
 //! # Example
 //!
 //! ```
-//! use futures_patterns::basic::poll_fn::poll_fn;
+//! use futures_patterns::advanced::poll_fn::poll_fn;
 //! use std::task::Poll;
 //!
 //! # #[tokio::main]
@@ -70,7 +70,7 @@ pub struct PollFn<F> {
 /// # Example
 ///
 /// ```
-/// use futures_patterns::basic::poll_fn::poll_fn;
+/// use futures_patterns::advanced::poll_fn::poll_fn;
 /// use std::task::Poll;
 ///
 /// # #[tokio::main]
@@ -152,7 +152,7 @@ where
 /// does not compile:
 ///
 /// ```compile_fail
-/// use futures_patterns::basic::poll_fn::alt::poll_fn;
+/// use futures_patterns::advanced::poll_fn::alt::poll_fn;
 /// use std::task::Poll;
 ///
 /// fn assert_unpin<T: Unpin>(_: &T) {}
@@ -184,7 +184,7 @@ pub mod alt {
     /// # Example
     ///
     /// ```
-    /// use futures_patterns::basic::poll_fn::alt::poll_fn;
+    /// use futures_patterns::advanced::poll_fn::alt::poll_fn;
     /// use std::task::Poll;
     ///
     /// # #[tokio::main]

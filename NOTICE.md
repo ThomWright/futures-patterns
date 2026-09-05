@@ -8,7 +8,7 @@ Everything listed is available under the MIT licence, which is reproduced once a
 
 Copyright (c) 2023 Tokio Contributors. <https://github.com/tokio-rs/tokio>
 
-- `basic::poll_fn` follows `tokio/src/future/poll_fn.rs`, including its use of `Pin::into_inner_unchecked` and the reasoning for leaving `PollFn` conditionally `Unpin`.
+- `advanced::poll_fn` follows `tokio/src/future/poll_fn.rs`, including its use of `Pin::into_inner_unchecked` and the reasoning for leaving `PollFn` conditionally `Unpin`.
 - `time::timeout` follows `tokio/src/time/timeout.rs`, and `Elapsed`'s message is taken from `tokio/src/time/error.rs`.
 
 ## futures-rs

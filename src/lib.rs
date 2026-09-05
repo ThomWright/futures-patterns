@@ -33,7 +33,6 @@
 //! - [`basic::ready`] - A future that immediately returns a value.
 //! - [`basic::pending`] - A future that never completes.
 //! - [`basic::yield_now`] - A future that gives up the thread once.
-//! - [`basic::poll_fn`] - Wrap a closure into a future.
 //! - [`basic::wrapper`] - Wrap an existing future in a newtype.
 //!
 //! These demonstrate the basic structure of futures and introduce concepts like
@@ -81,6 +80,12 @@
 //!
 //! This demonstrates integration with runtime services and practical patterns
 //! for real-world async code.
+//!
+//! ## Advanced
+//!
+//! Deeper explorations into more advanced topics:
+//!
+//! - [`advanced::poll_fn`] - Wrap a closure into a future.
 //!
 //! ## Testing
 //!
@@ -172,7 +177,7 @@
 //!
 //! ```
 //! use futures_patterns::basic::ready::ready;
-//! use futures_patterns::basic::poll_fn::poll_fn;
+//! use futures_patterns::advanced::poll_fn::poll_fn;
 //! use std::task::Poll;
 //!
 //! # #[tokio::main]
@@ -235,24 +240,24 @@
 //!
 //! 1. [`basic::ready`] and [`basic::pending`] -- always ready, and never ready.
 //! 2. [`basic::yield_now`] -- pending once, and arranging its own wake.
-//! 3. [`basic::poll_fn`] -- a future from a closure. The first place pinning forces
-//!    `unsafe`.
-//! 4. [`basic::wrapper`] -- wrapping another future, and pin projection.
-//! 5. [`state_machine::two_state`] -- states written out by hand, and asking to be
+//! 3. [`basic::wrapper`] -- wrapping another future, and pin projection.
+//! 4. [`state_machine::two_state`] -- states written out by hand, and asking to be
 //!    polled again.
-//! 6. [`waking::shared_state`] -- a future that waits until another thread wakes it.
+//! 5. [`waking::shared_state`] -- a future that waits until another thread wakes it.
 //!    Where readiness comes from.
-//! 7. [`state_machine::maybe_done`] -- keeping a finished future's output while the
+//! 6. [`state_machine::maybe_done`] -- keeping a finished future's output while the
 //!    others catch up.
-//! 8. [`composition::map`] -- transforming another future's output.
-//! 9. [`composition::race`] -- whichever of two finishes first, and why the polling
+//! 7. [`composition::map`] -- transforming another future's output.
+//! 8. [`composition::race`] -- whichever of two finishes first, and why the polling
 //!    order matters.
-//! 10. [`composition::join`] -- waiting for both. Then [`composition::try_join`],
-//!     where failing early means abandoning a branch.
-//! 11. [`composition::fuse`] -- promising more than the `Future` contract requires,
+//! 9. [`composition::join`] -- waiting for both. Then [`composition::try_join`],
+//!    where failing early means abandoning a branch.
+//! 10. [`composition::fuse`] -- promising more than the `Future` contract requires,
 //!     and [`fused`] for saying so.
-//! 12. [`time::timeout`] -- racing against the runtime's timer. The first pattern that
+//! 11. [`time::timeout`] -- racing against the runtime's timer. The first pattern that
 //!     needs a runtime.
+//! 12. [`advanced::poll_fn`] -- a future from a closure. The first place pinning forces
+//!     `unsafe`.
 //!
 //! # References
 //!
@@ -265,6 +270,7 @@
 //! A module derived from one of them says so in its own docs, and `NOTICE.md` records
 //! which file each follows.
 
+pub mod advanced;
 pub mod basic;
 pub mod composition;
 pub mod fused;
