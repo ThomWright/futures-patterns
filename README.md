@@ -75,7 +75,7 @@ Recommended order for understanding the patterns:
 
 Run `cargo doc --open` to view the full documentation with detailed explanations of each pattern.
 
-Run `cargo test` to check them. Most of the explanation lives in doc comments, so the doctests are a substantial part of the suite; `tests/` holds the poll-level tests that `.await` cannot express.
+Run `cargo test` to check them. Most of the explanation lives in doc comments, so the doctests are a substantial part of the suite; the poll-level tests that `.await` cannot express sit beside the code they cover, in each module's `mod tests`.
 
 ## References
 
