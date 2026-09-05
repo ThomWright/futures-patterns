@@ -176,7 +176,7 @@ where
 mod tests {
     use super::join;
     use crate::basic::pending::pending;
-    use crate::basic::poll_fn::poll_fn;
+    use std::future::poll_fn;
     use crate::basic::ready::ready;
     use crate::state_machine::two_state::CountDown;
     use crate::testing::{CountingWaker, poll_once, poll_until_ready};
