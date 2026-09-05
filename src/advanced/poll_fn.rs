@@ -124,10 +124,9 @@ where
 
 /// A safe alternative to the manual `unsafe` implementation above.
 ///
-/// The parent module reaches for `unsafe` twice: once for
-/// `Pin::into_inner_unchecked` in `poll`, and once for the hand-written
-/// `impl<F: Unpin> Unpin for PollFn<F>`. `pin_project_lite` expresses the same
-/// thing declaratively, with no `unsafe` at all.
+/// The [`PollFn`] above reaches for `unsafe` once, to get at the closure through
+/// `Pin::into_inner_unchecked`. `pin_project_lite` expresses the same thing
+/// declaratively, with none.
 ///
 /// # Why `#[project(!Unpin)]` is required here
 ///
@@ -137,13 +136,12 @@ where
 /// reason pin-project cannot be used for `poll_fn`.
 ///
 /// `#[project(!Unpin)]` is what closes that gap: it makes the struct *unconditionally*
-/// `!Unpin`, which is strictly more conservative than the manual impl, holding even
-/// when `F` is `Unpin`.
+/// `!Unpin`, stricter than the [`PollFn`] above, which is `Unpin` whenever `F` is.
 ///
-/// That is the safe choice for `poll_fn` specifically. As the parent module explains,
-/// the hazard is that an `Unpin` `PollFn` lets the compiler apply `noalias` to
-/// `&mut PollFn<F>`, and if the closure owns a future, that annotation leaks to the
-/// owned future. Opting out of `Unpin` entirely rules that out.
+/// That is the safe choice for `poll_fn` specifically: an `Unpin` `PollFn` lets the
+/// compiler apply `noalias` to `&mut PollFn<F>`, and if the closure owns a future,
+/// that annotation leaks to the owned future. Opting out of `Unpin` entirely rules
+/// that out.
 ///
 /// Note that `f` is deliberately *not* marked `#[pin]`. The closure is called, never
 /// polled, so nothing here needs a `Pin<&mut F>`.
