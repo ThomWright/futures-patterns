@@ -76,40 +76,41 @@
 //! Follows `futures-util/src/future/maybe_done.rs`; see NOTICE.md.
 
 use crate::fused::FusedFuture;
+use pin_project_lite::pin_project;
 use std::future::Future;
-use std::mem;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-/// A future that may have completed.
-///
-/// This enum represents three distinct states in the lifecycle of an async operation.
-#[derive(Debug)]
-pub enum MaybeDone<Fut: Future> {
-    /// A not-yet-completed future.
+pin_project! {
+    /// A future that may have completed.
     ///
-    /// The wrapped future is still being polled.
-    Future(Fut),
+    /// Only the inner future is `#[pin]`, so the stored output is ordinary data: it can
+    /// be handed out as `&mut` and moved out by `take_output`, and the generated `Unpin`
+    /// impl asks only whether `Fut` is `Unpin`, never `Fut::Output`.
+    #[project = MaybeDoneProj]
+    #[project_replace = MaybeDoneProjReplace]
+    #[derive(Debug)]
+    pub enum MaybeDone<Fut: Future> {
+        /// A not-yet-completed future.
+        ///
+        /// The wrapped future is still being polled.
+        Future {
+            #[pin]
+            future: Fut,
+        },
 
-    /// The output of the completed future.
-    ///
-    /// The future has completed successfully and we're holding its result.
-    Done(Fut::Output),
+        /// The output of the completed future.
+        ///
+        /// The future has completed successfully and we're holding its result.
+        Done { output: Fut::Output },
 
-    /// The empty variant after the result has been taken.
-    ///
-    /// This state is reached after calling `take_output()`. Polling in this
-    /// state will panic.
-    Gone,
+        /// The empty variant after the result has been taken.
+        ///
+        /// This state is reached after calling `take_output()`. Polling in this
+        /// state will panic.
+        Gone,
+    }
 }
-
-// Deliberately broader than the automatic impl, which would also require
-// `Fut::Output: Unpin` because the `Done` variant holds an output.
-//
-// SAFETY: the output is never structurally pinned -- no `Pin<&mut Fut::Output>` is
-// ever created, and `take_output` moves it out freely -- so only `Fut` needs to be
-// `Unpin` for the whole enum to be safely movable.
-impl<Fut: Future + Unpin> Unpin for MaybeDone<Fut> {}
 
 /// Wraps a future into a `MaybeDone`.
 ///
@@ -131,7 +132,7 @@ impl<Fut: Future + Unpin> Unpin for MaybeDone<Fut> {}
 /// # }
 /// ```
 pub fn maybe_done<Fut: Future>(future: Fut) -> MaybeDone<Fut> {
-    MaybeDone::Future(future)
+    MaybeDone::Future { future }
 }
 
 impl<Fut: Future> MaybeDone<Fut> {
@@ -159,14 +160,10 @@ impl<Fut: Future> MaybeDone<Fut> {
     /// # }
     /// ```
     pub fn output_mut(self: Pin<&mut Self>) -> Option<&mut Fut::Output> {
-        // SAFETY: We're only accessing the Done variant's output, not the Future variant.
-        // We never create a Pin<&mut Fut::Output>, only &mut Fut::Output.
-        unsafe {
-            let this = self.get_unchecked_mut();
-            match this {
-                MaybeDone::Done(res) => Some(res),
-                _ => None,
-            }
+        // `output` is not a `#[pin]` field, so projection hands back a plain `&mut`.
+        match self.project() {
+            MaybeDoneProj::Done { output } => Some(output),
+            MaybeDoneProj::Future { .. } | MaybeDoneProj::Gone => None,
         }
     }
 
@@ -202,22 +199,18 @@ impl<Fut: Future> MaybeDone<Fut> {
     /// ```
     #[inline]
     pub fn take_output(self: Pin<&mut Self>) -> Option<Fut::Output> {
-        // SAFETY: We're replacing the enum variant, which is safe because we have
-        // exclusive mutable access via Pin<&mut Self>.
-        unsafe {
-            let this = self.get_unchecked_mut();
-            match this {
-                MaybeDone::Done(_) => {}
-                MaybeDone::Future(_) | MaybeDone::Gone => return None,
-            };
+        // Checking first is what keeps a running future running: `project_replace`
+        // overwrites whatever is there, dropping a `#[pin]` field in place rather than
+        // returning it, so calling it in the `Future` state would destroy the future
+        // and hand back nothing.
+        if !matches!(&*self, MaybeDone::Done { .. }) {
+            return None;
+        }
 
-            // Replace the Done variant with Gone, extracting the output
-            if let MaybeDone::Done(output) = mem::replace(this, MaybeDone::Gone) {
-                Some(output)
-            } else {
-                // Unreachable: the match above returned for every variant but Done.
-                unreachable!()
-            }
+        match self.project_replace(MaybeDone::Gone) {
+            MaybeDoneProjReplace::Done { output } => Some(output),
+            // Unreachable: the guard above returned for every other variant.
+            _ => unreachable!(),
         }
     }
 }
@@ -225,8 +218,8 @@ impl<Fut: Future> MaybeDone<Fut> {
 impl<Fut: Future> FusedFuture for MaybeDone<Fut> {
     fn is_terminated(&self) -> bool {
         match self {
-            MaybeDone::Future(_) => false,
-            MaybeDone::Done(_) | MaybeDone::Gone => true,
+            MaybeDone::Future { .. } => false,
+            MaybeDone::Done { .. } | MaybeDone::Gone => true,
         }
     }
 }
@@ -235,32 +228,20 @@ impl<Fut: Future> Future for MaybeDone<Fut> {
     type Output = ();
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        // SAFETY: We need to poll the inner future, which requires pinning it.
-        // Since we're pinned and the Future variant contains the future, the future
-        // is also pinned.
-        let res = unsafe {
-            match self.as_mut().get_unchecked_mut() {
-                MaybeDone::Future(fut) => {
-                    // Poll the inner future
-                    // SAFETY: fut is pinned because self is pinned
-                    match Pin::new_unchecked(fut).poll(cx) {
-                        Poll::Ready(output) => output,
-                        Poll::Pending => return Poll::Pending,
-                    }
-                }
-                MaybeDone::Done(_) => {
-                    // Already completed, return Ready immediately
-                    return Poll::Ready(());
-                }
-                MaybeDone::Gone => {
-                    // Polling after the value has been taken is a logic error
-                    panic!("MaybeDone polled after value taken");
-                }
-            }
+        let output = match self.as_mut().project() {
+            // `future` is a `#[pin]` field, so projection hands back the
+            // `Pin<&mut Fut>` that polling it requires.
+            MaybeDoneProj::Future { future } => match future.poll(cx) {
+                Poll::Ready(output) => output,
+                Poll::Pending => return Poll::Pending,
+            },
+            // Absorb the poll rather than forwarding it: the inner future has already
+            // completed and must not be polled again.
+            MaybeDoneProj::Done { .. } => return Poll::Ready(()),
+            MaybeDoneProj::Gone => panic!("MaybeDone polled after value taken"),
         };
 
-        // Transition from Future to Done state
-        self.set(MaybeDone::Done(res));
+        self.set(MaybeDone::Done { output });
         Poll::Ready(())
     }
 }
@@ -351,9 +332,9 @@ mod tests {
     }
 
     #[test]
-    fn unpin_is_broader_than_the_automatic_impl_would_be() {
-        // The manual impl requires only `Fut: Unpin`. The automatic one would also demand
-        // `Fut::Output: Unpin`, because the `Done` variant holds an output.
+    fn unpin_does_not_depend_on_the_output_type() {
+        // `pin_project!` builds the `Unpin` impl from the `#[pin]` fields alone, so the
+        // output held by `Done` does not constrain it -- only `Fut` does.
         fn assert_unpin<T: Unpin>() {}
         assert_unpin::<MaybeDone<Ready<PhantomPinned>>>();
     }
