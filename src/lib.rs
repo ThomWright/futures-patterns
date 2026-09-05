@@ -4,16 +4,12 @@
 //!
 //! ### Pinning
 //!
-//! An `async fn` compiles to a state machine that can hold references into itself, so
-//! moving one after polling has begun would leave those references dangling.
-//! `Pin<&mut F>` is the promise that it will not move. `Unpin` marks the types that need
-//! no such promise -- most of them -- and for those a `Pin` is inert.
-//!
-//! A wrapper holding a future then decides whether its own pin reaches through to the
-//! field. [`advanced::pinning`] works through that choice and what each answer commits
-//! the wrapper to. [`composition::map`], [`composition::race`] and [`time::timeout`]
-//! take one answer with `pin-project-lite`; [`basic::ready`] and [`basic::pending`] take
-//! the other; [`advanced::poll_fn`] reaches for `unsafe` because neither fits.
+//! [`advanced::pinning`] covers `Pin`, `Unpin` and structural pinning: whether a
+//! wrapper's pin reaches the value it holds, and what each choice commits it to.
+//! [`composition::map`], [`composition::race`] and [`time::timeout`] pin their fields
+//! structurally, with `pin-project-lite`; [`basic::ready`] and [`basic::pending`] do
+//! not. [`advanced::poll_fn`] holds its closure non-structurally yet must still not be
+//! `Unpin`, which is why it reaches for `unsafe`.
 //!
 //! ### State management
 //!

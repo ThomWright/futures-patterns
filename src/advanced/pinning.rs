@@ -1,4 +1,12 @@
-//! Whether a wrapper's pin reaches the value inside it.
+//! `Pin`, `Unpin`, and structural pinning.
+//!
+//! An `async fn` compiles to a state machine that can hold references into itself, so
+//! moving one after polling has begun would leave those references dangling.
+//! `Pin<&mut F>` is the promise that it will not move. `Unpin` marks the types that need
+//! no such promise -- most of them -- and for those a `Pin` is inert: `Pin::new` wraps a
+//! `&mut` without ceremony and hands it straight back.
+//!
+//! # Structural pinning
 //!
 //! `Pin<&mut Wrapper>` promises that the wrapper will not move. Whether that promise
 //! extends to a field is not automatic: the wrapper decides, and the decision is called
