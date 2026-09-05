@@ -6,11 +6,11 @@
 //! # The challenge
 //!
 //! Storing a future -- `Notified` from `tokio::sync::Notify`, say, or a channel
-//! `Receiver` -- and forwarding `poll` to it is straightforward. Pinning is not. When
-//! the wrapper is pinned the inner future must be pinned too, and getting a
-//! `Pin<&mut Inner>` out of a `Pin<&mut Self>` is what pin projection means.
+//! `Receiver` -- and forwarding `poll` to it is straightforward. Pinning is not. The
+//! wrapper is polled through a `Pin<&mut Self>`, and polling the future inside needs a
+//! `Pin<&mut F>`. Marking the field `#[pin]` is what makes the wrapper's pin reach
+//! through to it, so that one can be produced.
 //!
-//! Marking the field `#[pin]` is what says the wrapper's pin reaches through to it.
 //! That choice, the routes for reaching a field either way, and what it commits the
 //! wrapper to, are in [`crate::advanced::pinning`]. Nothing below needs it: the two
 //! approaches here are enough to write a wrapper.

@@ -28,6 +28,11 @@
 //!
 //! # Getting at a field
 //!
+//! A *projection* is a method that borrows a field through a `Pin<&mut Self>`. What it
+//! hands back is the wrapper's choice: `Pin<&mut F>` for a structurally pinned field,
+//! `&mut F` for one that is not. Std reserves a narrower phrase for the first case,
+//! "projecting a pin", and calls the decision itself structural pinning.
+//!
 //! `Pin<&mut Self>` is not `&mut Self`, so reaching a field is a choice rather than a
 //! dereference, and several routes look plausible while only one compiles. Two questions
 //! decide it: is the field structurally pinned, and is its type `Unpin`.
