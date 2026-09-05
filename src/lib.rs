@@ -32,6 +32,7 @@
 //!
 //! - [`basic::ready`] - A future that immediately returns a value.
 //! - [`basic::pending`] - A future that never completes.
+//! - [`basic::yield_now`] - A future that gives up the thread once. Introduces waking.
 //! - [`basic::poll_fn`] - Wrap a closure into a future.
 //! - [`basic::wrapper`] - Wrap an existing future in a newtype.
 //!
