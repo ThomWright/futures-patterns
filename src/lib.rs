@@ -1,30 +1,20 @@
 //! Async patterns built on `poll`, `Pin` and `Waker`, explained.
 //!
-//! `async fn` is simpler, more ergonomic, and the right default. But some things cannot
+//! `async fn` is a higher level interface for writing async code. But some things cannot
 //! be written that way: a future you need to name, so it can sit in a struct field or
 //! have traits implemented on it; a leaf future woken by something outside the async
 //! world; a combinator driving several futures at once; or a type whose behaviour after
 //! completion is part of its contract.
 //!
-//! Doing it by hand means upholding contracts the compiler does not check, and which of
-//! them bites depends on what you are building. Wrapping or storing a future runs into
-//! `Pin`, where `Pin<&mut Self>` is not `&mut Self` and reaching a field becomes a
-//! choice between projection, reborrowing and an `unsafe` escape hatch; and into
-//! lifetimes, once it borrows. Writing one woken from outside
-//! runs into the waker rules, where returning `Pending` is a promise to arrange a wake,
-//! and forgetting it gives you a task that hangs rather than a program that fails to
-//! compile. Writing a combinator runs into the poll contract, and what you are allowed
-//! to do to a future that has already finished.
+//! Doing it by hand sometimes means satisfying compiler-enforced invariants which are
+//! difficult to meet, or upholding contracts the compiler does *not* check.
 //!
-//! Every pattern here exists to explain one of those.
-//!
-//! Some follow a production implementation closely and say which. Others are invented
-//! to isolate a single idea. Either way each is documented with the concepts it
-//! depends on, the trade-offs it makes, and what it simplifies.
+//! This library contains a set of examples to illustrate lower level async concepts, and
+//! show how to write code which satisfies both the compiler and those other invariants.
 //!
 //! # Organisation
 //!
-//! The patterns are organised by complexity:
+//! The examples are organised by complexity:
 //!
 //! ## Basic patterns
 //!
