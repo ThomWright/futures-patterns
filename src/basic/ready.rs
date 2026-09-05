@@ -74,17 +74,27 @@ impl<T> Future for Ready<T> {
     }
 }
 
-// Not redundant. `Unpin` is an auto trait, so the derived impl would only hold when
-// `T: Unpin`. `Ready` never creates a `Pin<&mut T>` -- the value is moved straight out
-// with `take()` -- so it is sound to be `Unpin` for every `T`, and useful: it means a
-// `Ready<T>` can be polled without boxing even when `T` cannot be moved.
+// `Ready<T>` is `Unpin` for every `T`, including a `T` that is not.
+//
+// It is not redundant: the compiler grants `Unpin` only when every field has it, so
+// `Ready<T>` would otherwise follow `T`. Claiming it for all `T` is sound because we
+// never construct a `Pin<&mut T>` anywhere -- the value is never pinned.
+//
+// `poll` above relies on it: remove this impl and `self.value.take()` stops compiling,
+// because reaching a field through a `Pin` is automatic only for `Unpin` types.
+//
+// See `advanced::pinning` for more about pinning.
 impl<T> Unpin for Ready<T> {}
 
 #[cfg(test)]
 mod tests {
-    use super::ready;
+    use super::{Ready, ready};
     use crate::testing::poll_once;
+    use std::marker::PhantomPinned;
+    use std::pin::Pin;
     use std::task::{Poll, Waker};
+
+    fn assert_unpin<T: Unpin>() {}
 
     #[test]
     fn completes_on_first_poll() {
@@ -99,5 +109,17 @@ mod tests {
         let mut fut = Box::pin(ready(42));
         let _ = poll_once(fut.as_mut(), Waker::noop());
         let _ = poll_once(fut.as_mut(), Waker::noop());
+    }
+
+    #[test]
+    fn is_unpin_even_when_the_value_is_not() {
+        assert_unpin::<Ready<PhantomPinned>>();
+
+        // What that buys the caller: `Pin::new`, so no `Box::pin` and no `pin!`.
+        let mut fut = ready(PhantomPinned);
+        assert_eq!(
+            poll_once(Pin::new(&mut fut), Waker::noop()),
+            Poll::Ready(PhantomPinned)
+        );
     }
 }
