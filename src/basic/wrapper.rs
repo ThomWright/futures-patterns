@@ -10,26 +10,10 @@
 //! the wrapper is pinned the inner future must be pinned too, and getting a
 //! `Pin<&mut Inner>` out of a `Pin<&mut Self>` is what pin projection means.
 //!
-//! # Getting at a field
-//!
-//! `Pin<&mut Self>` is not `&mut Self`, so reaching a field is a choice rather than a
-//! dereference, and several of the routes look plausible while only one compiles. Two
-//! questions decide it: is the field structurally pinned, meaning marked `#[pin]`, and
-//! is its type `Unpin`.
-//!
-//! | You have | You want | Use |
-//! |---|---|---|
-//! | `Pin<&mut Self>`, field is `#[pin]` | `Pin<&mut F>`, to poll it | `self.project().field` |
-//! | `Pin<&mut Self>`, field is not `#[pin]` | `&mut F`, to call or read it | `self.project().field` |
-//! | `&mut F` where `F: Unpin` | `Pin<&mut F>` | `Pin::new(&mut f)` |
-//! | `Pin<&mut Option<F>>` | `Option<Pin<&mut F>>` | `.as_pin_mut()` |
-//! | `Pin<&mut Self>`, needed again afterwards | a second `Pin<&mut Self>` | `self.as_mut()` |
-//! | `Pin<&mut F>` | to replace the value in place | `.set(new)` |
-//! | none of the above | `&mut Self` | `unsafe { get_unchecked_mut() }` |
-//!
-//! The last row is the escape hatch, and reaching for it usually means one of the first
-//! two answers was wrong. Two places here genuinely need it: `maybe_done` uses
-//! `get_unchecked_mut`, and `poll_fn` the equivalent `Pin::into_inner_unchecked`.
+//! Marking the field `#[pin]` is what says the wrapper's pin reaches through to it.
+//! That choice, the routes for reaching a field either way, and what it commits the
+//! wrapper to, are in [`crate::advanced::pinning`]. Nothing below needs it: the two
+//! approaches here are enough to write a wrapper.
 //!
 //! # Two approaches
 //!

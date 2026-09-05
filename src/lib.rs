@@ -4,12 +4,16 @@
 //!
 //! ### Pinning
 //!
-//! Futures often need to be pinned in memory because they can contain self-referential
-//! data. Different patterns demonstrate different pinning strategies:
+//! An `async fn` compiles to a state machine that can hold references into itself, so
+//! moving one after polling has begun would leave those references dangling.
+//! `Pin<&mut F>` is the promise that it will not move. `Unpin` marks the types that need
+//! no such promise -- most of them -- and for those a `Pin` is inert.
 //!
-//! - Manual unsafe pinning (in `poll_fn`)
-//! - Conditional `Unpin` implementation (in `maybe_done`)
-//! - `pin-project-lite` for safe projection (in `map`, `race`, `timeout`)
+//! A wrapper holding a future then decides whether its own pin reaches through to the
+//! field. [`advanced::pinning`] works through that choice and what each answer commits
+//! the wrapper to. [`composition::map`], [`composition::race`] and [`time::timeout`]
+//! take one answer with `pin-project-lite`; [`basic::ready`] and [`basic::pending`] take
+//! the other; [`advanced::poll_fn`] reaches for `unsafe` because neither fits.
 //!
 //! ### State management
 //!

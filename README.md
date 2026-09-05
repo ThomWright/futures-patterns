@@ -67,6 +67,7 @@ This demonstrates integration with runtime services and practical patterns for r
 
 Deeper explorations into more advanced topics:
 
+- [`advanced::pinning`] - Whether a wrapper's pin reaches the value inside it.
 - [`advanced::poll_fn`] - Wrap a closure into a future.
 
 ### Testing
@@ -90,7 +91,8 @@ Recommended order for learning:
 9. [`composition::join`] - waiting for both. Then [`composition::try_join`], where failing early means abandoning a branch.
 10. [`composition::fuse`] - promising more than the `Future` contract requires, and [`fused`] for saying so.
 11. [`time::timeout`] - racing against the runtime's timer. The first example that needs a runtime.
-12. [`advanced::poll_fn`] - a future from a closure. The first place pinning forces `unsafe`.
+12. [`advanced::pinning`] - the choice each wrapper makes about the field it holds, and what it commits to.
+13. [`advanced::poll_fn`] - a future from a closure. The first place pinning forces `unsafe`.
 
 [`testing`] is useful throughout; reach for it as soon as you want to assert on something `.await` cannot show you.
 
