@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![deny(unsafe_code)]
 //!
 //! ## Key concepts
 //!
@@ -138,6 +139,9 @@
 //! # }
 //! ```
 //!
+// The only module allowed `unsafe`: hand-rolled pin projection is what it
+// exists to show. Everywhere else uses `pin_project!`.
+#[allow(unsafe_code)]
 pub mod advanced;
 pub mod basic;
 pub mod composition;
