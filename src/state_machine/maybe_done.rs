@@ -2,8 +2,8 @@
 //!
 //! Wraps another future and tracks whether it has finished, using three states:
 //!
-//! - `Future(Fut)` - The wrapped future hasn't completed yet.
-//! - `Done(Fut::Output)` - The future completed, and we're storing its output.
+//! - `Future { future }` - The wrapped future hasn't completed yet.
+//! - `Done { output }` - The future completed, and we're storing its output.
 //! - `Gone` - The output has been extracted.
 //!
 //! # State transitions
@@ -33,21 +33,22 @@
 //!
 //! [`FusedFuture::is_terminated`]: crate::fused::FusedFuture::is_terminated
 //!
-//! # Why three states?
+//! # Why three states rather than two
 //!
-//! The `Gone` state exists to handle the case where someone calls `take_output()`
-//! to extract the value. Without it, we'd need to use `Option<Fut::Output>` in the
-//! `Done` variant, which would require `Fut::Output: Default` or similar constraints.
+//! `Done { output: Option<Fut::Output> }` would work, and would need no bound on the
+//! output: `Option::take` moves a value out of any type, which is how
+//! [`crate::basic::ready`] hands over its own.
+//!
+//! Three states because a difference in which operations are valid is a difference in
+//! state: `Done` and `Gone` differ on both `poll` and `take_output`.
 //!
 //! # When to use
 //!
-//! This pattern is useful for:
-//! - Implementing join/select operations that need to check completion status; see
-//!   [`composition::join`](crate::composition::join), which is built from this and
-//!   whose three problems map one to one onto these three states
-//! - Building futures that need to poll multiple sub-futures
-//! - Caching future results without requiring Clone
-//! - Implementing try_join where you need to store successful results
+//! When coordinating several futures, where "has it finished?" and "give me the value"
+//! happen at different moments: see [`composition::join`](crate::composition::join),
+//! which is built from this and whose three problems map one to one onto these three
+//! states. Storing the output rather than returning it also means it need not be
+//! `Clone`.
 //!
 //! # Example
 //!
@@ -113,9 +114,6 @@ pin_project! {
 }
 
 /// Wraps a future into a `MaybeDone`.
-///
-/// This allows tracking whether the future has completed and extracting its
-/// output after completion.
 ///
 /// # Example
 ///
