@@ -29,6 +29,7 @@ Applies to doc comments, README and commit messages alike.
 - **Never use a word that stands in for the specifics.** Ones that have needed removing from this repo: fundamental, comprehensive, powerful, production-like, crucial, robust, properly. Say what is actually true or cut the sentence.
 - **Describe the subject, not the document.** No "this is a crucial learning point", "here's why", "it is worth being explicit about", "as we will see". If a point needs making, make it.
 - **Do not explain the joke.** State the thing and trust the reader.
+- **Name the thing; don't characterise it.** Headings, summary lines and cross-references all have to mean something read *before* whatever they introduce. Ones that have failed here: "The claim nothing checks", "why that is a choice rather than a detail", "the same decision made the other way", "one answer … the other" — each gestures at a subject's significance, or at its relation to something else, instead of naming it. Once a term is defined, use it: "pins its field structurally", not "takes one answer". Where it is not yet defined, use words the reader already has: "for more about pinning", not "for structural pinning".
 
 ### Introduce before using
 

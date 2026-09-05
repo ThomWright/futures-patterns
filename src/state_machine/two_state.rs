@@ -18,7 +18,7 @@
 //! the original count, which is no longer recoverable once `remaining` has been
 //! decremented.
 //!
-//! # What it shows
+//! # Writing a state machine by hand
 //!
 //! - Writing the states out as an enum, and moving between them inside `poll`
 //! - Carrying the data a later state will need
