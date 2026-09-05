@@ -103,7 +103,7 @@ pub enum MaybeDone<Fut: Future> {
     Gone,
 }
 
-// Deliberately broader than the derived impl, which would also require
+// Deliberately broader than the automatic impl, which would also require
 // `Fut::Output: Unpin` because the `Done` variant holds an output.
 //
 // SAFETY: the output is never structurally pinned -- no `Pin<&mut Fut::Output>` is
@@ -351,8 +351,8 @@ mod tests {
     }
 
     #[test]
-    fn unpin_is_broader_than_the_derived_impl_would_be() {
-        // The manual impl requires only `Fut: Unpin`. A derived one would also demand
+    fn unpin_is_broader_than_the_automatic_impl_would_be() {
+        // The manual impl requires only `Fut: Unpin`. The automatic one would also demand
         // `Fut::Output: Unpin`, because the `Done` variant holds an output.
         fn assert_unpin<T: Unpin>() {}
         assert_unpin::<MaybeDone<Ready<PhantomPinned>>>();

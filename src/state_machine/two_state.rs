@@ -116,7 +116,7 @@ impl Future for CountDown {
 }
 
 // No manual `Unpin` impl is needed: both variants hold only `usize`, so the compiler
-// derives `Unpin` already.
+// implements `Unpin` already.
 
 // CountDown's contract is entirely about how many times it is polled and what it
 // wakes, so these drive it by hand rather than with `.await`.
@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn is_unpin_without_a_manual_impl() {
-        // Both variants hold only `usize`, so the derived impl covers this.
+        // Both variants hold only `usize`, so the automatic impl covers this.
         fn assert_unpin<T: Unpin>() {}
         assert_unpin::<CountDown>();
     }

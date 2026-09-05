@@ -9,7 +9,7 @@
 //! mutable references to it. A closure that owns a future would then leak that
 //! annotation to the future it owns, which is unsound.
 //!
-//! The derived impl already gives what is needed -- `PollFn<F>` is `Unpin` exactly
+//! The automatic impl already gives what is needed -- `PollFn<F>` is `Unpin` exactly
 //! when `F` is -- so the fix is to add no `Unpin` impl of our own.
 //!
 //! See: <https://internals.rust-lang.org/t/surprising-soundness-trouble-around-pollfn/17484>
@@ -117,7 +117,7 @@ where
 
 // There is deliberately no `Unpin` impl here at all, not even a conditional one.
 //
-// The derived impl already makes `PollFn<F>` `Unpin` exactly when `F` is, which is what
+// The automatic impl already makes `PollFn<F>` `Unpin` exactly when `F` is, which is what
 // soundness requires; writing it out by hand would only restate that. What matters is
 // that we never write the *unconditional* `impl<F> Unpin for PollFn<F> {}`. Tokio does
 // the same, and covers the property with a test rather than an impl.
